@@ -11,6 +11,8 @@ export default class Scene {
   constructor() {
     this.scene = null;
 
+    this.pause = false;
+
     this.camera = null;
     this.cameraOffset = new THREE.Vector3(0, 3, 0);
 
@@ -51,14 +53,15 @@ export default class Scene {
     this.stats.begin();
     const currentTime = performance.now();
     const elapsedFrameTime = currentTime - this.lastFrameTime;
-
-    if (elapsedFrameTime > this.frameDelay) {
-      this.player.updateAnimations(this.clock);
-      this.player.updatePlayerPosition();
-      TWEEN.update();
-      this.composer.render();
-      this.dynamicCamera();
-      this.lastFrameTime = currentTime - (elapsedFrameTime % this.frameDelay);
+    if (!this.pause) {
+      if (elapsedFrameTime > this.frameDelay) {
+        this.player.updateAnimations(this.clock);
+        this.player.updatePlayerPosition();
+        TWEEN.update();
+        this.composer.render();
+        this.dynamicCamera();
+        this.lastFrameTime = currentTime - (elapsedFrameTime % this.frameDelay);
+      }
     }
 
     requestAnimationFrame(this.animate.bind(this));
