@@ -11,6 +11,7 @@ export default class Player extends Entities {
     this.playerWalkingAnim = null;
     this.playerIdleAnim = null;
     this.playerRunningAnim = null;
+    this.animationTimeOnPause = 0;
 
     this.isRunning = false;
     this.moveForward = false;
@@ -19,7 +20,9 @@ export default class Player extends Entities {
     this.rotateRight = false;
 
     this.currentState = "idle";
+    this.isTheGamePaused = false;
 
+    this.lastBackwardKeyPressTime = 0;
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
   }
@@ -139,12 +142,14 @@ export default class Player extends Entities {
       }
       switch (this.currentState) {
         case "idle":
+          this.playerIdleAnim.time = this.animationTimeOnPause;
           this.playerIdleAnim.play();
           this.playerIdleAnim.setEffectiveTimeScale(1);
           prevAnim.crossFadeTo(this.playerIdleAnim, transitionDuration, true);
           break;
 
         case "walking":
+          this.playerWalkingAnim.time = this.animationTimeOnPause;
           this.playerWalkingAnim.play();
           this.playerWalkingAnim.setEffectiveTimeScale(1);
           prevAnim.crossFadeTo(
@@ -155,6 +160,7 @@ export default class Player extends Entities {
           break;
 
         case "running":
+          this.playerRunningAnim.time = this.animationTimeOnPause;
           this.playerRunningAnim.play();
           this.playerRunningAnim.setEffectiveTimeScale(1);
           prevAnim.crossFadeTo(
@@ -188,6 +194,7 @@ export default class Player extends Entities {
         break;
       case "S":
         this.moveBackward = true;
+        this.checkDoubleBackwardPress();
         break;
       case "Q":
         this.rotateLeft = true;
@@ -228,6 +235,38 @@ export default class Player extends Entities {
     this.playerMovementState();
   }
 
+  checkDoubleBackwardPress() {
+    const currentTime = performance.now();
+    const timeSinceLastPress = currentTime - this.lastBackwardKeyPressTime;
+
+    if (timeSinceLastPress < 200 && !this.isTheGamePaused) {
+      this.triggerQuickTurn();
+    }
+
+    this.lastBackwardKeyPressTime = currentTime;
+  }
+
+  triggerQuickTurn() {
+    const targetRotation = this.model.rotation.y + Math.PI;
+    let quickTurnProgress = 0;
+    const quickTurnSpeed = 0.02;
+
+    const updateQuickTurn = () => {
+      quickTurnProgress += quickTurnSpeed;
+      this.model.rotation.y = THREE.MathUtils.lerp(
+        this.model.rotation.y,
+        targetRotation,
+        quickTurnProgress
+      );
+
+      if (quickTurnProgress < 0.5) {
+        requestAnimationFrame(updateQuickTurn);
+      }
+    };
+
+    updateQuickTurn();
+  }
+
   playerMovementState() {
     if (
       this.moveForward ||
@@ -247,7 +286,11 @@ export default class Player extends Entities {
   updateAnimations(clock) {
     const delta = clock.getDelta();
     if (this.mixer) {
-      this.mixer.update(delta);
+      if (!this.isTheGamePaused) {
+        this.mixer.update(delta);
+      } else {
+        this.animationTimeOnPause += delta;
+      }
     }
   }
 }

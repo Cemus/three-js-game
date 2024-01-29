@@ -11,7 +11,7 @@ export default class Scene {
   constructor() {
     this.scene = null;
 
-    this.pause = false;
+    this.isTheGamePaused = false;
 
     this.camera = null;
     this.cameraOffset = new THREE.Vector3(0, 3, 0);
@@ -19,6 +19,7 @@ export default class Scene {
     this.renderer = null;
     this.composer = null;
 
+    this.instanceList = [];
     this.player = null;
 
     this.clock = new THREE.Clock();
@@ -44,6 +45,8 @@ export default class Scene {
 
     window.addEventListener("resize", this.handleWindowResize.bind(this));
     this.player = new Player();
+    console.log(this.player);
+    this.instanceList.push(this.player);
     await this.player.loadGameAssets().then(() => {
       this.scene.add(this.player.model);
     });
@@ -53,9 +56,10 @@ export default class Scene {
     this.stats.begin();
     const currentTime = performance.now();
     const elapsedFrameTime = currentTime - this.lastFrameTime;
-    if (!this.pause) {
-      if (elapsedFrameTime > this.frameDelay) {
-        this.player.updateAnimations(this.clock);
+
+    if (elapsedFrameTime > this.frameDelay) {
+      this.player.updateAnimations(this.clock);
+      if (!this.isTheGamePaused) {
         this.player.updatePlayerPosition();
         TWEEN.update();
         this.composer.render();

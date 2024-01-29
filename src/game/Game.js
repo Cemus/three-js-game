@@ -21,15 +21,21 @@ export default class Game {
 
   toggleInventory() {
     const inventory = document.getElementById("inventory");
-    if (inventory.style.display === "none") {
-      inventory.style.display = "block";
-      console.log("block");
-      this.scene.pause = true;
+    console.log(inventory.classList[0]);
+    if (inventory.classList[0] === "hidden") {
+      inventory.classList.replace("hidden", "visible");
+      this.pauseTheGame(false);
     } else {
-      inventory.style.display = "none";
-      this.scene.pause = false;
-      console.log("none");
+      inventory.classList.replace("visible", "hidden");
+      this.pauseTheGame(true);
     }
+  }
+
+  pauseTheGame(boolean) {
+    this.scene.isTheGamePaused = boolean;
+    this.scene.instanceList.forEach((instance) => {
+      instance.isTheGamePaused = boolean;
+    });
   }
 }
 
