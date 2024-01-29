@@ -11,15 +11,16 @@ export default class Game {
   }
   startGame() {
     this.scene.animate();
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "e") {
+    document.addEventListener("keyup", (event) => {
+      const eKeyToUpperCase = event.key.toUpperCase();
+      if (eKeyToUpperCase === "E") {
         this.toggleInventory();
       }
     });
   }
 
   toggleInventory() {
-    var inventory = document.getElementById("inventory");
+    const inventory = document.getElementById("inventory");
     if (inventory.style.display === "none") {
       inventory.style.display = "block";
       console.log("block");

@@ -63,7 +63,6 @@ export default class Scene {
         this.lastFrameTime = currentTime - (elapsedFrameTime % this.frameDelay);
       }
     }
-
     requestAnimationFrame(this.animate.bind(this));
     this.stats.end();
   }
