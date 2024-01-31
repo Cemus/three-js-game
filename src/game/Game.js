@@ -24,10 +24,10 @@ export default class Game {
     console.log(inventory.classList[0]);
     if (inventory.classList[0] === "hidden") {
       inventory.classList.replace("hidden", "visible");
-      this.pauseTheGame(false);
+      this.pauseTheGame(true);
     } else {
       inventory.classList.replace("visible", "hidden");
-      this.pauseTheGame(true);
+      this.pauseTheGame(false);
     }
   }
 

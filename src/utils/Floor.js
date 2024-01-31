@@ -43,6 +43,7 @@ export default class Floor {
     aoMap.repeat.set(128, 128);
 
     const planeGeometry = new THREE.PlaneGeometry(50, 50);
+
     const planeMaterial = new THREE.MeshStandardMaterial({
       map: map,
       roughnessMap: roughnessMap,
@@ -53,7 +54,6 @@ export default class Floor {
     const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
     planeMesh.rotation.x = -Math.PI / 2;
     planeMesh.receiveShadow = true;
-    planeMesh.castShadow = true;
 
     return planeMesh;
   }

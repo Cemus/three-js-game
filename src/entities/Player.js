@@ -59,10 +59,14 @@ export default class Player extends Entities {
 
   setupPlayer() {
     this.setupListeners();
-    this.model.castShadow = true;
-    this.model.receiveShadow = true;
+
+    this.model.traverse((node) => {
+      node.castShadow = true;
+      node.receiveShadow = true;
+    });
+
     this.model.rotation.set(0, 0, 0);
-    this.model.position.set(0, 0, 0);
+    this.model.position.set(0, 0, 4);
     this.model.scale.set(0.2, 0.2, 0.2);
   }
 
@@ -194,7 +198,7 @@ export default class Player extends Entities {
         break;
       case "S":
         this.moveBackward = true;
-        this.checkDoubleBackwardPress();
+
         break;
       case "Q":
         this.rotateLeft = true;
@@ -219,6 +223,7 @@ export default class Player extends Entities {
         break;
       case "S":
         this.moveBackward = false;
+        this.checkDoubleBackwardPress();
         break;
       case "Q":
         this.rotateLeft = false;
