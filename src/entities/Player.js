@@ -1,9 +1,11 @@
 import * as THREE from "three";
-import Entities from "./Entity";
+import Loader from "./Loader";
 
-export default class Player extends Entities {
-  constructor() {
-    super();
+export default class Player {
+  constructor(loader, cameraTriggerActivation) {
+    this.cameraTriggerActivation = cameraTriggerActivation;
+
+    this.loader = loader;
     this.assetsFolder = "../../assets/models/player/";
     this.assetsModelName = "lastPsych.gltf";
     this.mixer = null;
@@ -25,23 +27,26 @@ export default class Player extends Entities {
     this.lastBackwardKeyPressTime = 0;
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
+
+    this.collider = null;
+    this.isColliding = false;
   }
 
   async loadGameAssets() {
     try {
-      this.model = await this.loadModel(
+      this.model = await this.loader.loadModel(
         `${this.assetsFolder}${this.assetsModelName}`
       );
       this.setupPlayer();
       this.mixer = new THREE.AnimationMixer(this.model);
 
-      const walkingAnim = await this.loadAnimation(
+      const walkingAnim = await this.loader.loadAnimation(
         `${this.assetsFolder}playerWalkingAnim.gltf`
       );
-      const idleAnim = await this.loadAnimation(
+      const idleAnim = await this.loader.loadAnimation(
         `${this.assetsFolder}playerIdleAnim.gltf`
       );
-      const runningAnim = await this.loadAnimation(
+      const runningAnim = await this.loader.loadAnimation(
         `${this.assetsFolder}playerRunningAnim.gltf`
       );
 
@@ -68,6 +73,8 @@ export default class Player extends Entities {
     this.model.rotation.set(0, 0, 0);
     this.model.position.set(0, 0, 4);
     this.model.scale.set(0.2, 0.2, 0.2);
+
+    this.collider = new THREE.Box3().setFromObject(this.model);
   }
 
   async setupAnimations(walkingAnim, idleAnim, runningAnim) {
@@ -80,12 +87,22 @@ export default class Player extends Entities {
     }
   }
 
-  updatePlayerPosition() {
+  updatePlayerPosition(solidInstancesList, triggerList) {
     const rotationSpeed = 0.06;
     const normalSpeed = 4;
     const backwardSpeed = 2.5;
     const runningSpeed = 4.5;
     const multiplicateur = 0.01;
+
+    this.collider.setFromObject(this.model);
+
+    if (this.checkWallCollisions(solidInstancesList)) {
+      this.handleWallCollisions(solidInstancesList);
+    }
+
+    if (this.checkTriggerCollisions(triggerList)) {
+      this.handleTriggerCollisions(triggerList);
+    }
 
     if (this.moveForward) {
       const forwardDelta = new THREE.Vector3(0, 0, 1).applyAxisAngle(
@@ -126,6 +143,86 @@ export default class Player extends Entities {
     }
   }
 
+  checkWallCollisions(solidInstancesList) {
+    for (const object of solidInstancesList) {
+      if (object.userData.isSolid) {
+        if (this.collider.intersectsBox(object.userData.collider)) {
+          console.log(object);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  handleWallCollisions(solidInstancesList) {
+    const pushDistance = 0.1;
+    const originalY = this.model.position.y;
+    const directionsToTest = [
+      new THREE.Vector3(-pushDistance, 0, 0), // Gauche
+      new THREE.Vector3(pushDistance, 0, 0), // Droite
+      new THREE.Vector3(0, 0, -pushDistance), // Arrière
+      new THREE.Vector3(0, 0, pushDistance), // Avant
+      new THREE.Vector3(-pushDistance, 0, -pushDistance), // Diagonale haut gauche
+      new THREE.Vector3(pushDistance, 0, -pushDistance), // Diagonale haut droite
+      new THREE.Vector3(-pushDistance, 0, pushDistance), // Diagonale bas gauche
+      new THREE.Vector3(pushDistance, 0, pushDistance), // Diagonale bas droite
+    ];
+
+    let newPosition = this.model.position.clone();
+    const collisionBox = new THREE.Box3().setFromObject(this.model);
+
+    for (const direction of directionsToTest) {
+      const offset = direction.clone();
+
+      newPosition.add(offset);
+      collisionBox.translate(offset);
+
+      let isColliding = false;
+
+      // Collision ?
+      for (const object of solidInstancesList) {
+        if (
+          object.userData.isSolid &&
+          collisionBox.intersectsBox(object.userData.collider)
+        ) {
+          isColliding = true;
+          break;
+        }
+      }
+
+      if (!isColliding) {
+        this.model.position.copy(newPosition);
+        this.model.position.y = originalY;
+        return;
+      }
+
+      // Reset
+      newPosition.sub(offset);
+      collisionBox.translate(offset.negate());
+    }
+  }
+
+  checkTriggerCollisions(triggerList) {
+    for (const object of triggerList) {
+      if (this.collider.intersectsBox(object.userData.collider)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  handleTriggerCollisions(triggerList) {
+    for (const object of triggerList) {
+      if (this.collider.intersectsBox(object.userData.collider)) {
+        const objectName = object.name;
+        if (objectName.includes("cameraTrigger")) {
+          const cameraNumber = objectName.substring("cameraTrigger".length);
+          this.cameraTriggerActivation(parseInt(cameraNumber));
+        }
+      }
+    }
+  }
   animationTransitionState(newState) {
     const transitionDuration = 0.25;
     if (this.currentState !== newState) {
