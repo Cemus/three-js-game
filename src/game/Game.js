@@ -3,9 +3,10 @@ import Scene from "./Scene";
 export default class Game {
   constructor() {
     this.scene = null;
+    this.playerSpawningZone = 0;
   }
   async init() {
-    this.scene = new Scene();
+    this.scene = new Scene(this.playerSpawningZone, this.setPlayerSpawningZone);
     await this.scene.init();
     this.startGame();
   }
@@ -29,6 +30,10 @@ export default class Game {
       inventory.classList.replace("visible", "hidden");
       this.pauseTheGame(false);
     }
+  }
+
+  setPlayerSpawningZone(zone) {
+    this.playerSpawningZone = zone;
   }
 
   pauseTheGame(boolean) {

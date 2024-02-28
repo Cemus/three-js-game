@@ -2,7 +2,8 @@ import * as THREE from "three";
 import Loader from "./Loader";
 
 export default class Player {
-  constructor(loader, cameraTriggerActivation) {
+  constructor(loader, playerSpawningZone, cameraTriggerActivation) {
+    this.playerSpawningZone = playerSpawningZone;
     this.cameraTriggerActivation = cameraTriggerActivation;
 
     this.loader = loader;
@@ -70,8 +71,16 @@ export default class Player {
       node.receiveShadow = true;
     });
 
-    this.model.rotation.set(0, 0, 0);
-    this.model.position.set(0, 0, 4);
+    const spawnPosition = this.playerSpawningZone.position.clone();
+    const spawnRotation = this.playerSpawningZone.quaternion.clone();
+    const forwardRotation = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 1, 0),
+      Math.PI
+    );
+
+    spawnRotation.multiply(forwardRotation);
+    this.model.position.copy(spawnPosition);
+    this.model.quaternion.copy(spawnRotation);
     this.model.scale.set(0.2, 0.2, 0.2);
 
     this.collider = new THREE.Box3().setFromObject(this.model);

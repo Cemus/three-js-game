@@ -9,7 +9,10 @@ import Player from "../entities/Player";
 import Loader from "../entities/Loader";
 
 export default class Scene {
-  constructor() {
+  constructor(playerSpawningZoneNumber, setPlayerSpawningZone) {
+    this.playerSpawningZoneNumber = playerSpawningZoneNumber;
+    this.setPlayerSpawningZone = setPlayerSpawningZone;
+
     this.scene = null;
 
     this.isTheGamePaused = false;
@@ -28,6 +31,7 @@ export default class Scene {
 
     this.solidInstanceList = [];
     this.triggerList = [];
+    this.playerSpawningZoneList = [];
 
     this.clock = new THREE.Clock();
 
@@ -61,7 +65,11 @@ export default class Scene {
     this.scene.add(this.level);
     console.log("level ajouté");
 
-    this.player = new Player(loader, this.cameraTriggerActivation.bind(this));
+    this.player = new Player(
+      loader,
+      this.playerSpawningZoneList[this.playerSpawningZoneNumber],
+      this.cameraTriggerActivation.bind(this)
+    );
     this.instanceList.push(this.player);
     await this.player.loadGameAssets().then(() => {
       this.scene.add(this.player.model);
@@ -99,13 +107,16 @@ export default class Scene {
   }
   async setupInterractiveObjectsProperties() {
     const tempTriggerList = [];
-    const tempPlayerSpawnZoneList = [];
+    const tempPlayerSpawningZoneList = [];
 
     this.level.traverse((node) => {
       //Spawn
-      if (node.name.startsWith("spawnPoint")) {
-        const playerSpawnZoneNumber = parseInt(node.name.match(/\d+/)[0]);
-        tempPlayerSpawnZoneList.push({ node, number: playerSpawnZoneNumber });
+      if (node.name.startsWith("playerSpawningZone")) {
+        const playerSpawningZoneNumber = parseInt(node.name.match(/\d+/)[0]);
+        tempPlayerSpawningZoneList.push({
+          node,
+          number: playerSpawningZoneNumber,
+        });
       }
       //Solid
       if (node.name.startsWith("solid_")) {
@@ -120,10 +131,15 @@ export default class Scene {
       }
     });
 
-    tempPlayerSpawnZoneList.sort((a, b) => a.number - b.number);
-
+    tempPlayerSpawningZoneList.sort((a, b) => a.number - b.number);
     tempTriggerList.sort((a, b) => a.number - b.number);
+
+    this.playerSpawningZoneList.push(
+      ...tempPlayerSpawningZoneList.map((entry) => entry.node)
+    );
     this.triggerList.push(...tempTriggerList.map((entry) => entry.node));
+
+    console.log(this.playerSpawningZoneList);
   }
 
   async setupCamera() {
