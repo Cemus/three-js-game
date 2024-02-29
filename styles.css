@@ -3,19 +3,20 @@ body {
   background-color: black;
 }
 
-.visible {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  padding: 10px;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: #fff;
+#interactMessage {
+  position: fixed;
+  font-family: "Courier New", Courier, monospace;
+  left: 50%;
+  top: 95%;
+  transform: translate(-50%, -50%);
+  font-size: 3rem;
+  color: white;
+  padding: 10px 20px;
   border-radius: 5px;
-  max-width: 300px;
-  display: block;
+  display: none;
 }
 
-.hidden {
+#inventory {
   position: absolute;
   bottom: 10px;
   left: 10px;

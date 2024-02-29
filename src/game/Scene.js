@@ -9,9 +9,16 @@ import Player from "../entities/Player";
 import Loader from "../entities/Loader";
 
 export default class Scene {
-  constructor(playerSpawningZoneNumber, setPlayerSpawningZone) {
+  constructor(
+    playerSpawningZoneNumber,
+    setPlayerSpawningZone,
+    toggleInteractPrompt
+  ) {
     this.playerSpawningZoneNumber = playerSpawningZoneNumber;
     this.setPlayerSpawningZone = setPlayerSpawningZone;
+    this.toggleInteractPrompt = toggleInteractPrompt;
+
+    //Prompt
 
     this.scene = null;
 
@@ -68,7 +75,8 @@ export default class Scene {
     this.player = new Player(
       loader,
       this.playerSpawningZoneList[this.playerSpawningZoneNumber],
-      this.cameraTriggerActivation.bind(this)
+      this.cameraTriggerActivation.bind(this),
+      this.toggleInteractPrompt
     );
     this.instanceList.push(this.player);
     await this.player.loadGameAssets().then(() => {
@@ -258,10 +266,11 @@ export default class Scene {
   }
 
   handleWindowResize() {
-    if (this.currentCamera.camera) {
-      this.currentCamera.camera.aspect = window.innerWidth / window.innerHeight;
-      this.currentCamera.camera.updateProjectionMatrix();
+    this.cameraList.forEach((cameraObject) => {
+      cameraObject.camera.aspect = window.innerWidth / window.innerHeight;
+      cameraObject.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-    }
+    });
+    z;
   }
 }

@@ -2,9 +2,15 @@ import * as THREE from "three";
 import Loader from "./Loader";
 
 export default class Player {
-  constructor(loader, playerSpawningZone, cameraTriggerActivation) {
+  constructor(
+    loader,
+    playerSpawningZone,
+    cameraTriggerActivation,
+    toggleInteractPrompt
+  ) {
     this.playerSpawningZone = playerSpawningZone;
     this.cameraTriggerActivation = cameraTriggerActivation;
+    this.toggleInteractPrompt = toggleInteractPrompt;
 
     this.loader = loader;
     this.assetsFolder = "../../assets/models/player/";
@@ -72,15 +78,11 @@ export default class Player {
     });
 
     const spawnPosition = this.playerSpawningZone.position.clone();
-    const spawnRotation = this.playerSpawningZone.quaternion.clone();
-    const forwardRotation = new THREE.Quaternion().setFromAxisAngle(
-      new THREE.Vector3(0, 1, 0),
-      Math.PI
-    );
+    const spawnRotation = this.playerSpawningZone.rotation.clone();
 
-    spawnRotation.multiply(forwardRotation);
+    this.model.rotation.copy(spawnRotation);
     this.model.position.copy(spawnPosition);
-    this.model.quaternion.copy(spawnRotation);
+
     this.model.scale.set(0.2, 0.2, 0.2);
 
     this.collider = new THREE.Box3().setFromObject(this.model);
@@ -108,15 +110,14 @@ export default class Player {
     if (this.checkWallCollisions(solidInstancesList)) {
       this.handleWallCollisions(solidInstancesList);
     }
-
+    this.toggleInteractPrompt(false);
     if (this.checkTriggerCollisions(triggerList)) {
       this.handleTriggerCollisions(triggerList);
     }
 
     if (this.moveForward) {
-      const forwardDelta = new THREE.Vector3(0, 0, 1).applyAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        this.model.rotation.y
+      const forwardDelta = new THREE.Vector3(0, 0, 1).applyQuaternion(
+        this.model.quaternion
       );
       this.model.position.add(
         forwardDelta.multiplyScalar(normalSpeed * multiplicateur)
@@ -124,9 +125,8 @@ export default class Player {
     }
 
     if (this.moveBackward) {
-      const backwardDelta = new THREE.Vector3(0, 0, -1).applyAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        this.model.rotation.y
+      const backwardDelta = new THREE.Vector3(0, 0, -1).applyQuaternion(
+        this.model.quaternion
       );
       this.model.position.add(
         backwardDelta.multiplyScalar(backwardSpeed * multiplicateur)
@@ -134,9 +134,8 @@ export default class Player {
     }
 
     if (this.isRunning && this.moveForward) {
-      const forwardDelta = new THREE.Vector3(0, 0, 1).applyAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        this.model.rotation.y
+      const forwardDelta = new THREE.Vector3(0, 0, 1).applyQuaternion(
+        this.model.quaternion
       );
       this.model.position.add(
         forwardDelta.multiplyScalar(runningSpeed * multiplicateur)
@@ -144,11 +143,11 @@ export default class Player {
     }
 
     if (this.rotateLeft) {
-      this.model.rotation.y += rotationSpeed;
+      this.model.rotation.y -= rotationSpeed;
     }
 
     if (this.rotateRight) {
-      this.model.rotation.y -= rotationSpeed;
+      this.model.rotation.y += rotationSpeed;
     }
   }
 
@@ -156,7 +155,6 @@ export default class Player {
     for (const object of solidInstancesList) {
       if (object.userData.isSolid) {
         if (this.collider.intersectsBox(object.userData.collider)) {
-          console.log(object);
           return true;
         }
       }
@@ -228,6 +226,9 @@ export default class Player {
         if (objectName.includes("cameraTrigger")) {
           const cameraNumber = objectName.substring("cameraTrigger".length);
           this.cameraTriggerActivation(parseInt(cameraNumber));
+        }
+        if (objectName.includes("doorTrigger")) {
+          this.toggleInteractPrompt(true);
         }
       }
     }

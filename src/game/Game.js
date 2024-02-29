@@ -4,9 +4,19 @@ export default class Game {
   constructor() {
     this.scene = null;
     this.playerSpawningZone = 0;
+
+    //Inventory
+    this.isInventoryToggled = false;
+
+    //prompt
+    this.isInteractPromptToggled = false;
   }
   async init() {
-    this.scene = new Scene(this.playerSpawningZone, this.setPlayerSpawningZone);
+    this.scene = new Scene(
+      this.playerSpawningZone,
+      this.setPlayerSpawningZone.bind(this),
+      this.toggleInteractPrompt.bind(this)
+    );
     await this.scene.init();
     this.startGame();
   }
@@ -22,14 +32,23 @@ export default class Game {
 
   toggleInventory() {
     const inventory = document.getElementById("inventory");
-    console.log(inventory.classList[0]);
-    if (inventory.classList[0] === "hidden") {
-      inventory.classList.replace("hidden", "visible");
-      this.pauseTheGame(true);
-    } else {
-      inventory.classList.replace("visible", "hidden");
-      this.pauseTheGame(false);
-    }
+    this.isInventoryToggled = !this.isInventoryToggled;
+    this.scene.isTheGamePaused = this.isInventoryToggled;
+    this.isInventoryToggled
+      ? (inventory.style.display = "block")
+      : (inventory.style.display = "none");
+  }
+
+  toggleInteractPrompt(boolean) {
+    this.isInteractPromptToggled = boolean;
+    this.displayInteractPrompt();
+  }
+
+  displayInteractPrompt() {
+    const interactMessage = document.getElementById("interactMessage");
+    this.isInteractPromptToggled
+      ? (interactMessage.style.display = "block")
+      : (interactMessage.style.display = "none");
   }
 
   setPlayerSpawningZone(zone) {
