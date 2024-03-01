@@ -5,7 +5,7 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
-import Player from "../entities/Player";
+import Player from "../player/Player";
 import Loader from "../entities/Loader";
 
 export default class Scene {
@@ -65,24 +65,25 @@ export default class Scene {
     this.scene.background = new THREE.Color("black");
 
     //Whole level
-    const loader = new Loader();
-    this.level = await loader.loadModel("../../assets/rooms/hall.gltf");
+    let loader = new Loader();
+    this.level = await loader.loadModel("../../assets/rooms/entranceRoom.gltf");
     await this.setupInterractiveObjectsProperties();
 
     this.scene.add(this.level);
     console.log("level ajouté");
 
     this.player = new Player(
-      loader,
       this.playerSpawningZoneList[this.playerSpawningZoneNumber],
       this.cameraTriggerActivation.bind(this),
       this.toggleInteractPrompt
     );
     this.instanceList.push(this.player);
-    await this.player.loadGameAssets().then(() => {
+    await this.player.init().then(() => {
       this.scene.add(this.player.model);
     });
 
+    //Libérer le loader
+    loader = null;
     console.log("personnage ajouté");
     //Render
     this.setupCamera();
@@ -98,12 +99,9 @@ export default class Scene {
     const currentTime = performance.now();
     const elapsedFrameTime = currentTime - this.lastFrameTime;
     if (elapsedFrameTime > this.frameDelay) {
-      this.player.updateAnimations(this.clock);
+      this.player.animation.update(this.clock);
       if (!this.isTheGamePaused) {
-        this.player.updatePlayerPosition(
-          this.solidInstanceList,
-          this.triggerList
-        );
+        this.player.update(this.solidInstanceList, this.triggerList);
         TWEEN.update();
         this.handleCameras();
         this.composer.render(this.scene, this.currentCamera.camera);
