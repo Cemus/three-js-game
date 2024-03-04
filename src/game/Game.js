@@ -46,9 +46,18 @@ export default class Game {
 
   displayInteractPrompt() {
     const interactMessage = document.getElementById("interactMessage");
-    this.isInteractPromptToggled
-      ? (interactMessage.style.display = "block")
-      : (interactMessage.style.display = "none");
+
+    if (this.isInteractPromptToggled) {
+      interactMessage.style.display = "block";
+      console.log("lol");
+      document.addEventListener("keyup", async (e) => {
+        if (e.code == "Space") {
+          await this.scene.changeLevel("../../assets/rooms/garageRoom.gltf");
+        }
+      });
+    } else {
+      interactMessage.style.display = "none";
+    }
   }
 
   setPlayerSpawningZone(zone) {

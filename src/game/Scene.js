@@ -7,6 +7,8 @@ import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import Player from "../player/Player";
 import Loader from "../entities/Loader";
+import Camera from "./Camera";
+import Light from "./Light";
 
 export default class Scene {
   constructor(
@@ -24,9 +26,11 @@ export default class Scene {
 
     this.isTheGamePaused = false;
 
-    this.cameraList = [];
-    this.currentCamera = null;
-    this.cameraOffset = new THREE.Vector3(0, 3, 0);
+    this.camera = new Camera(this);
+    this.light = new Light(this);
+    this.stats = new Stats();
+    this.clock = new THREE.Clock();
+
     this.shadowHelper = null;
 
     this.renderer = null;
@@ -40,10 +44,6 @@ export default class Scene {
     this.triggerList = [];
     this.playerSpawningZoneList = [];
 
-    this.clock = new THREE.Clock();
-
-    this.stats = new Stats();
-
     //Framerate lock
     this.targetFrameRate = 60;
     this.frameDelay = 1000 / this.targetFrameRate;
@@ -51,44 +51,44 @@ export default class Scene {
   }
   async init() {
     //Listeners
+
     window.addEventListener("resize", this.handleWindowResize.bind(this));
 
+    console.log(window);
     //Panel framerate
     this.stats.showPanel(0);
+    document.body.appendChild(this.stats.dom);
 
     //Scene
-    document.body.appendChild(this.stats.dom);
     this.scene = new THREE.Scene();
     this.scene.castShadow = true;
     this.scene.receiveShadow = true;
 
-    this.scene.background = new THREE.Color("black");
-
     //Whole level
     let loader = new Loader();
     this.level = await loader.loadModel("../../assets/rooms/entranceRoom.gltf");
+    loader = null;
+
     await this.setupInterractiveObjectsProperties();
 
-    this.scene.add(this.level);
+    this.addToScene(this.level);
     console.log("level ajouté");
 
     this.player = new Player(
       this.playerSpawningZoneList[this.playerSpawningZoneNumber],
-      this.cameraTriggerActivation.bind(this),
+      this.camera.update.bind(this.camera), //bind ?
       this.toggleInteractPrompt
     );
     this.instanceList.push(this.player);
     await this.player.init().then(() => {
-      this.scene.add(this.player.model);
+      this.addToScene(this.player.model);
     });
 
-    //Libérer le loader
-    loader = null;
     console.log("personnage ajouté");
     //Render
-    this.setupCamera();
+    this.camera.init();
     console.log("camera ok");
-    this.setupLights();
+    this.light.init();
     console.log("lumière ok");
     this.setupRenderer();
     console.log("renderer ok");
@@ -103,14 +103,19 @@ export default class Scene {
       if (!this.isTheGamePaused) {
         this.player.update(this.solidInstanceList, this.triggerList);
         TWEEN.update();
-        this.handleCameras();
-        this.composer.render(this.scene, this.currentCamera.camera);
+        this.camera.handleCameraModes();
+        this.composer.render(this.scene, this.camera.currentCamera.camera);
         this.lastFrameTime = currentTime - (elapsedFrameTime % this.frameDelay);
       }
     }
     requestAnimationFrame(this.animate.bind(this));
     this.stats.end();
   }
+
+  addToScene(object) {
+    this.scene.add(object);
+  }
+
   async setupInterractiveObjectsProperties() {
     const tempTriggerList = [];
     const tempPlayerSpawningZoneList = [];
@@ -148,62 +153,6 @@ export default class Scene {
     console.log(this.playerSpawningZoneList);
   }
 
-  async setupCamera() {
-    const tempCameraList = [];
-    this.level.traverse((node) => {
-      if (node.name.includes("camera") && node.name.includes("Orientation")) {
-        const cameraNumber = parseInt(node.name.match(/\d+/)[0]);
-        console.log(cameraNumber);
-        const cameraObject = node.name.includes("static")
-          ? { camera: node, mode: "static" }
-          : { camera: node, mode: "dynamic" };
-        console.log(cameraObject);
-
-        cameraObject.camera.aspect = window.innerWidth / window.innerHeight;
-        tempCameraList.push({ ...cameraObject, number: cameraNumber });
-      }
-    });
-    console.log(tempCameraList);
-    tempCameraList.sort((a, b) => a.number - b.number);
-    this.cameraList = tempCameraList.map((entry) => ({
-      camera: entry.camera,
-      mode: entry.mode,
-    }));
-
-    this.currentCamera = this.cameraList[0];
-    console.log(this.cameraList);
-  }
-
-  handleCameras() {
-    this.currentCamera.mode == "static"
-      ? this.staticCamera()
-      : this.dynamicCamera();
-  }
-
-  staticCamera() {
-    this.currentCamera.camera.updateProjectionMatrix();
-  }
-
-  dynamicCamera() {
-    const playerPosition = this.player.model.position.clone();
-    const cameraTarget = playerPosition.add(this.cameraOffset);
-    this.currentCamera.camera.lookAt(cameraTarget);
-    this.currentCamera.camera.updateProjectionMatrix();
-  }
-
-  cameraTriggerActivation(cameraActivated) {
-    if (this.currentCamera !== this.cameraList[cameraActivated]) {
-      console.log(cameraActivated);
-      this.currentCamera = this.cameraList[cameraActivated];
-      this.currentCamera.camera.updateProjectionMatrix();
-      this.composer.passes[0].camera = this.currentCamera.camera;
-      this.composer.passes[0].setSize(window.innerWidth, window.innerHeight);
-      console.log("current C", this.currentCamera);
-      console.log("rotation C", this.currentCamera.camera.rotation);
-      console.log("position C", this.currentCamera.camera.rotation);
-    }
-  }
-
   setupRenderer() {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.shadowMap.enabled = true;
@@ -216,51 +165,11 @@ export default class Scene {
 
     this.composer = new EffectComposer(this.renderer);
 
-    const renderPass = new RenderPass(this.scene, this.currentCamera.camera);
+    const renderPass = new RenderPass(
+      this.scene,
+      this.camera.currentCamera.camera
+    );
     this.composer.addPass(renderPass);
-  }
-
-  setupLights() {
-    const directionalLight = new THREE.DirectionalLight("white", 0.3);
-    directionalLight.castShadow = true;
-    directionalLight.position.x += 50;
-    directionalLight.position.y += 50;
-    directionalLight.position.z += 150;
-    //Evite l'effet "télé cathodique"
-    directionalLight.shadow.bias = -0.0001;
-    //N'affiche pas les ombres lointaines
-    directionalLight.shadow.camera.near = 0.1;
-    directionalLight.shadow.camera.far = 500.0;
-    directionalLight.shadow.mapSize.width = 2048;
-    directionalLight.shadow.mapSize.height = 2048;
-
-    const shadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
-
-    /*     this.scene.add(shadowHelper); */
-    this.scene.add(directionalLight);
-
-    this.level.traverse((node) => {
-      if (node.userData.name === "light") {
-        console.log(node);
-        const pointLight = new THREE.PointLight("white", 1, 500, 1);
-        pointLight.castShadow = true;
-        pointLight.position.x = node.position.x;
-        pointLight.position.y = node.position.y;
-        pointLight.position.z = node.position.z;
-        //Evite l'effet "télé cathodique"
-        pointLight.shadow.bias = -0.0001;
-        //N'affiche pas les ombres lointaines
-        pointLight.shadow.camera.near = 0.1;
-        pointLight.shadow.camera.far = 500.0;
-        pointLight.shadow.mapSize.width = 2048;
-        pointLight.shadow.mapSize.height = 2048;
-
-        const shadowHelper = new THREE.CameraHelper(pointLight.shadow.camera);
-        /*         this.scene.add(shadowHelper); */
-        console.log(pointLight);
-        this.scene.add(pointLight);
-      }
-    });
   }
 
   handleWindowResize() {
@@ -269,6 +178,29 @@ export default class Scene {
       cameraObject.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
     });
-    z;
+  }
+
+  destroy() {
+    //Listeners
+    window.removeEventListener("resize", this.handleWindowResize.bind(this));
+
+    //Remove objects
+    this.light = null;
+    this.camera = null;
+    this.stats = null;
+    this.clock = null;
+  }
+
+  async changeLevel(newLevelPath) {
+    this.destroy();
+    this.scene.remove(this.level);
+
+    let loader = new Loader();
+    this.level = await loader.loadModel(newLevelPath);
+    loader = null;
+
+    await this.setupInterractiveObjectsProperties();
+
+    this.addToScene(this.level);
   }
 }
