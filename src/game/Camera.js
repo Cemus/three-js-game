@@ -44,7 +44,6 @@ export default class Camera {
 
   update(cameraActivated) {
     if (this.currentCamera !== this.cameraList[cameraActivated]) {
-      console.log(cameraActivated);
       this.currentCamera = this.cameraList[cameraActivated];
       this.currentCamera.camera.updateProjectionMatrix();
       this.scene.composer.passes[0].camera = this.currentCamera.camera;
@@ -52,9 +51,6 @@ export default class Camera {
         window.innerWidth,
         window.innerHeight
       );
-      console.log("current C", this.currentCamera);
-      console.log("rotation C", this.currentCamera.camera.rotation);
-      console.log("position C", this.currentCamera.camera.rotation);
     }
   }
 }

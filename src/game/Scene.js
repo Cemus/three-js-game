@@ -12,10 +12,12 @@ import Light from "./Light";
 
 export default class Scene {
   constructor(
+    currentRoomURL,
     playerSpawningZoneNumber,
     setPlayerSpawningZone,
     toggleInteractPrompt
   ) {
+    this.currentRoomURL = currentRoomURL;
     this.playerSpawningZoneNumber = playerSpawningZoneNumber;
     this.setPlayerSpawningZone = setPlayerSpawningZone;
     this.toggleInteractPrompt = toggleInteractPrompt;
@@ -25,7 +27,9 @@ export default class Scene {
     this.scene = null;
 
     this.isTheGamePaused = false;
+    this.changingScene = false;
 
+    this.loader = new Loader();
     this.camera = new Camera(this);
     this.light = new Light(this);
     this.stats = new Stats();
@@ -54,7 +58,6 @@ export default class Scene {
 
     window.addEventListener("resize", this.handleWindowResize.bind(this));
 
-    console.log(window);
     //Panel framerate
     this.stats.showPanel(0);
     document.body.appendChild(this.stats.dom);
@@ -64,16 +67,13 @@ export default class Scene {
     this.scene.castShadow = true;
     this.scene.receiveShadow = true;
 
-    //Whole level
-    let loader = new Loader();
-    this.level = await loader.loadModel("../../assets/rooms/entranceRoom.gltf");
-    loader = null;
+    //Level
 
+    this.level = await this.loader.loadModel(this.currentRoomURL);
     await this.setupInterractiveObjectsProperties();
-
     this.addToScene(this.level);
-    console.log("level ajouté");
 
+    //Character
     this.player = new Player(
       this.playerSpawningZoneList[this.playerSpawningZoneNumber],
       this.camera.update.bind(this.camera), //bind ?
@@ -84,32 +84,31 @@ export default class Scene {
       this.addToScene(this.player.model);
     });
 
-    console.log("personnage ajouté");
     //Render
     this.camera.init();
-    console.log("camera ok");
     this.light.init();
-    console.log("lumière ok");
     this.setupRenderer();
-    console.log("renderer ok");
   }
 
   animate() {
-    this.stats.begin();
-    const currentTime = performance.now();
-    const elapsedFrameTime = currentTime - this.lastFrameTime;
-    if (elapsedFrameTime > this.frameDelay) {
-      this.player.animation.update(this.clock);
-      if (!this.isTheGamePaused) {
-        this.player.update(this.solidInstanceList, this.triggerList);
-        TWEEN.update();
-        this.camera.handleCameraModes();
-        this.composer.render(this.scene, this.camera.currentCamera.camera);
-        this.lastFrameTime = currentTime - (elapsedFrameTime % this.frameDelay);
+    if (!this.changingScene) {
+      this.stats.begin();
+      const currentTime = performance.now();
+      const elapsedFrameTime = currentTime - this.lastFrameTime;
+      if (elapsedFrameTime > this.frameDelay) {
+        this.player.animation.update(this.clock);
+        if (!this.isTheGamePaused) {
+          this.player.update(this.solidInstanceList, this.triggerList);
+          TWEEN.update();
+          this.camera.handleCameraModes();
+          this.composer.render(this.scene, this.camera.currentCamera.camera);
+          this.lastFrameTime =
+            currentTime - (elapsedFrameTime % this.frameDelay);
+        }
       }
+      requestAnimationFrame(this.animate.bind(this));
+      this.stats.end();
     }
-    requestAnimationFrame(this.animate.bind(this));
-    this.stats.end();
   }
 
   addToScene(object) {
@@ -149,8 +148,6 @@ export default class Scene {
       ...tempPlayerSpawningZoneList.map((entry) => entry.node)
     );
     this.triggerList.push(...tempTriggerList.map((entry) => entry.node));
-
-    console.log(this.playerSpawningZoneList);
   }
 
   setupRenderer() {
@@ -180,7 +177,8 @@ export default class Scene {
     });
   }
 
-  destroy() {
+  async destroy() {
+    this.changingScene = true;
     //Listeners
     window.removeEventListener("resize", this.handleWindowResize.bind(this));
 
@@ -189,18 +187,13 @@ export default class Scene {
     this.camera = null;
     this.stats = null;
     this.clock = null;
-  }
-
-  async changeLevel(newLevelPath) {
-    this.destroy();
-    this.scene.remove(this.level);
-
-    let loader = new Loader();
-    this.level = await loader.loadModel(newLevelPath);
-    loader = null;
-
-    await this.setupInterractiveObjectsProperties();
-
-    this.addToScene(this.level);
+    this.loader = null;
+    this.player = null;
+    this.level.traverse((node) => {
+      node.remove();
+    });
+    const canvas = this.renderer.domElement;
+    canvas.parentNode.removeChild(canvas);
+    this.scene = null;
   }
 }

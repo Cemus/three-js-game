@@ -10,13 +10,14 @@ export default class PlayerMovement {
     const isShiftPressed = e.shiftKey;
     switch (e.key.toUpperCase()) {
       case "Z":
+      case "W":
         this.player.moveForward = true;
         break;
       case "S":
         this.player.moveBackward = true;
-
         break;
       case "Q":
+      case "A":
         this.player.rotateLeft = true;
         break;
       case "D":
@@ -35,6 +36,7 @@ export default class PlayerMovement {
     const isShiftUp = e.shiftKey;
     switch (e.key.toUpperCase()) {
       case "Z":
+      case "W":
         this.player.moveForward = false;
         break;
       case "S":
@@ -42,6 +44,7 @@ export default class PlayerMovement {
         this.checkDoubleBackwardPress();
         break;
       case "Q":
+      case "A":
         this.player.rotateLeft = false;
         break;
       case "D":
@@ -68,7 +71,7 @@ export default class PlayerMovement {
   }
 
   triggerQuickTurn() {
-    const targetRotation = this.model.rotation.y + Math.PI;
+    const targetRotation = this.player.model.rotation.y + Math.PI;
     let quickTurnProgress = 0;
     const quickTurnSpeed = 0.02;
 
@@ -122,12 +125,13 @@ export default class PlayerMovement {
       );
     }
 
+    let rotationDirection = 0;
     if (this.player.rotateLeft) {
-      this.player.model.rotation.y -= rotationSpeed;
+      rotationDirection += rotationSpeed;
     }
-
     if (this.player.rotateRight) {
-      this.player.model.rotation.y += rotationSpeed;
+      rotationDirection -= rotationSpeed;
     }
+    this.player.model.rotateY(rotationDirection);
   }
 }

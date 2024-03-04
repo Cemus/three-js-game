@@ -82,7 +82,7 @@ export default class PlayerCollision {
           this.player.cameraTriggerActivation(parseInt(cameraNumber));
         }
         if (objectName.includes("doorTrigger")) {
-          this.player.toggleInteractPrompt(true);
+          this.player.toggleInteractPrompt(objectName);
         }
       }
     }

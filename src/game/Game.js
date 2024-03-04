@@ -5,29 +5,28 @@ export default class Game {
     this.scene = null;
     this.playerSpawningZone = 0;
 
+    this.currentRoomURL = "../../assets/rooms/entranceRoom.gltf";
+
     //Inventory
     this.isInventoryToggled = false;
 
+    this.hasInteracted = false;
     //prompt
     this.isInteractPromptToggled = false;
   }
   async init() {
     this.scene = new Scene(
+      this.currentRoomURL,
       this.playerSpawningZone,
       this.setPlayerSpawningZone.bind(this),
-      this.toggleInteractPrompt.bind(this)
+      this.displayInteractPrompt.bind(this)
     );
     await this.scene.init();
     this.startGame();
   }
   startGame() {
     this.scene.animate();
-    document.addEventListener("keyup", (event) => {
-      const eKeyToUpperCase = event.key.toUpperCase();
-      if (eKeyToUpperCase === "E") {
-        this.toggleInventory();
-      }
-    });
+    document.addEventListener("keyup", (event) => this.onKeyUp(event));
   }
 
   toggleInventory() {
@@ -39,24 +38,46 @@ export default class Game {
       : (inventory.style.display = "none");
   }
 
-  toggleInteractPrompt(boolean) {
-    this.isInteractPromptToggled = boolean;
-    this.displayInteractPrompt();
+  onKeyUp(event) {
+    const eKeyToUpperCase = event.key.toUpperCase();
+    if (eKeyToUpperCase === "E") {
+      this.toggleInventory();
+    }
   }
 
-  displayInteractPrompt() {
-    const interactMessage = document.getElementById("interactMessage");
+  async changeLevel(event, nextLevel) {
+    if (event.code == "Space" && !this.hasInteracted) {
+      this.isInteractPromptToggled = false;
+      this.hasInteracted = true;
+      document.removeEventListener("keyup", (e) => this.onKeyUp(e));
+      this.currentRoomURL = nextLevel;
+      await this.scene.destroy();
+      this.scene = null;
+      this.init();
+    }
+  }
 
+  contextualAction(interactiveObjectName) {
+    const objectFromName = interactiveObjectName.split("_")[1];
+    document.removeEventListener("keyup", this.changeLevelListener);
+    this.changeLevelListener = (event) =>
+      this.changeLevel(event, `../../assets/rooms/${objectFromName}.gltf`);
+    document.addEventListener("keyup", this.changeLevelListener);
+  }
+
+  displayInteractPrompt(interactiveObjectName) {
+    this.isInteractPromptToggled = true;
+    const interactMessage = document.getElementById("interactMessage");
+    console.log(interactiveObjectName);
     if (this.isInteractPromptToggled) {
       interactMessage.style.display = "block";
-      console.log("lol");
-      document.addEventListener("keyup", async (e) => {
-        if (e.code == "Space") {
-          await this.scene.changeLevel("../../assets/rooms/garageRoom.gltf");
-        }
-      });
-    } else {
-      interactMessage.style.display = "none";
+      this.contextualAction(interactiveObjectName);
+      const hidePromptOnKeyPress = () => {
+        this.isInteractPromptToggled = false;
+        document.removeEventListener("keyup", hidePromptOnKeyPress);
+        interactMessage.style.display = "none";
+      };
+      document.addEventListener("keyup", hidePromptOnKeyPress);
     }
   }
 

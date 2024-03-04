@@ -101,7 +101,6 @@ export default class Player {
     if (this.collision.checkWallCollisions(solidInstancesList)) {
       this.collision.handleWallCollisions(solidInstancesList);
     }
-    this.toggleInteractPrompt(false);
     if (this.collision.checkTriggerCollisions(triggerList)) {
       this.collision.handleTriggerCollisions(triggerList);
     }

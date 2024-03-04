@@ -11,7 +11,6 @@ export default class PlayerAnimation {
       this.player.playerWalkingAnim = this.player.mixer.clipAction(
         animations[0]
       );
-      console.log(this.player.mixer);
       this.player.playerIdleAnim = this.player.mixer.clipAction(animations[1]);
       this.player.playerRunningAnim = this.player.mixer.clipAction(
         animations[2]
@@ -70,7 +69,6 @@ export default class PlayerAnimation {
       switch (this.player.currentState) {
         case "idle":
           this.player.playerIdleAnim.time = this.player.animationTimeOnPause;
-          console.log(this.player.playerIdleAnim);
           this.player.playerIdleAnim.play();
           this.player.playerIdleAnim.setEffectiveTimeScale(1);
           prevAnim.crossFadeTo(
@@ -81,7 +79,6 @@ export default class PlayerAnimation {
           break;
 
         case "walking":
-          console.log("this");
           this.player.playerWalkingAnim.time = this.player.animationTimeOnPause;
           this.player.playerWalkingAnim.play();
           this.player.playerWalkingAnim.setEffectiveTimeScale(1);
