@@ -170,7 +170,7 @@ export default class Scene {
   }
 
   handleWindowResize() {
-    this.cameraList.forEach((cameraObject) => {
+    this.camera.cameraList.forEach((cameraObject) => {
       cameraObject.camera.aspect = window.innerWidth / window.innerHeight;
       cameraObject.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);

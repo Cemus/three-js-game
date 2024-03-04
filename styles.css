@@ -3,7 +3,8 @@ body {
   background-color: black;
 }
 
-#interactMessage {
+#interactMessage,
+#inspectionMessage {
   position: fixed;
   font-family: "Courier New", Courier, monospace;
   left: 50%;
