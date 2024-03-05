@@ -10,7 +10,6 @@ export default class Loader {
         url,
         (gltf) => {
           const model = gltf.scene;
-          console.log(model);
           model.traverse((node) => {
             if (node.isMesh) {
               if (node.name.startsWith("solid_")) {

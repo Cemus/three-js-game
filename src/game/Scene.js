@@ -72,11 +72,13 @@ export default class Scene {
     this.level = await this.loader.loadModel(this.currentRoomURL);
     await this.setupInterractiveObjectsProperties();
     this.addToScene(this.level);
+    console.log(this.playerSpawningZoneList);
+    console.log(this.playerSpawningZoneNumber);
 
     //Character
     this.player = new Player(
       this.playerSpawningZoneList[this.playerSpawningZoneNumber],
-      this.camera.update.bind(this.camera), //bind ?
+      this.camera.update.bind(this.camera),
       this.toggleInteractPrompt
     );
     this.instanceList.push(this.player);
@@ -122,7 +124,7 @@ export default class Scene {
     this.level.traverse((node) => {
       //Spawn
       if (node.name.startsWith("playerSpawningZone")) {
-        const playerSpawningZoneNumber = parseInt(node.name.match(/\d+/)[0]);
+        const playerSpawningZoneNumber = node.name.slice("_")[1];
         tempPlayerSpawningZoneList.push({
           node,
           number: playerSpawningZoneNumber,
@@ -135,8 +137,8 @@ export default class Scene {
       }
       //General Triggers
       if (node.name.includes("Trigger")) {
+        const triggerNumber = node.name.slice("_")[1];
         node.userData.collider = new THREE.Box3().setFromObject(node);
-        const triggerNumber = parseInt(node.name.match(/\d+/)[0]);
         tempTriggerList.push({ node, number: triggerNumber });
       }
     });

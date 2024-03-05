@@ -22,9 +22,9 @@ export default class Light {
 
     /*     this.scene.add(shadowHelper); */
     this.scene.addToScene(directionalLight);
-
     this.scene.level.traverse((node) => {
-      if (node.userData.name === "light") {
+      if (node.name.includes("light")) {
+        console.log(node);
         const pointLight = new THREE.PointLight("white", 1, 500, 1);
         pointLight.castShadow = true;
         pointLight.position.x = node.position.x;
@@ -40,7 +40,6 @@ export default class Light {
 
         const shadowHelper = new THREE.CameraHelper(pointLight.shadow.camera);
         /*         this.scene.add(shadowHelper); */
-        console.log(pointLight);
         this.scene.addToScene(pointLight);
       }
     });

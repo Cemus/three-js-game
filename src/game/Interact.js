@@ -7,11 +7,12 @@ export default class Interact {
     this.interactMessage = document.getElementById("interactMessage");
     this.inspectionMessage = document.getElementById("inspectionMessage");
 
-    this.nextLevelURL = null;
     this.inspectedObject = null;
 
     this.changeLevelListeners = [];
     this.inspectListeners = [];
+
+    this.doorInteractingWith = null;
   }
 
   init() {
@@ -34,11 +35,23 @@ export default class Interact {
     this.isInteractPromptToggled = true;
     if (interactiveObjectName.includes("doorTrigger")) {
       const objectFromName = interactiveObjectName.split("_")[1];
-      if (objectFromName !== "jammed") {
-        this.nextLevelURL = `../../assets/rooms/${objectFromName}.gltf`;
+
+      console.log("door", objectFromName);
+      const currentRoom = this.game.rooms[this.game.currentRoomIndex];
+      console.log("cur", currentRoom);
+      console.log(this.doorInteractingWith);
+      const doorInfo = currentRoom.connectedDoors[objectFromName];
+      console.log("info", doorInfo);
+      const nextRoomIndex = doorInfo.room;
+      console.log("next r", nextRoomIndex);
+      const nextDoorNumber = doorInfo.door;
+      console.log("next d", nextDoorNumber);
+
+      this.doorInteractingWith = doorInfo;
+      if (nextRoomIndex !== "jammed") {
         this.changeLevelListener();
       } else {
-        this.inspectedObject = objectFromName;
+        this.inspectedObject = "jammed";
         this.inspectListener();
       }
     }
@@ -51,12 +64,15 @@ export default class Interact {
       this.changeLevelListeners.push(listener);
     }
   }
+
   async changeLevel(event) {
     this.hideInteractPrompt();
     if (event.code == "Space" && !this.hasInteracted) {
       this.isInteractPromptToggled = false;
       this.hasInteracted = true;
-      this.game.currentRoomURL = this.nextLevelURL;
+
+      this.game.currentRoomIndex = this.doorInteractingWith.room;
+      this.game.playerSpawningZone = this.doorInteractingWith.door;
       await this.game.scene.destroy();
       this.game.scene = null;
       this.game.init();
