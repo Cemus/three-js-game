@@ -55,9 +55,9 @@ class Room {
     this.roomURL = roomURL;
     this.connectedDoors = {};
 
-    for (let i = 0; i < doorCount; i++) {
+    /*     for (let i = 0; i < doorCount; i++) {
       this.connectedDoors[i] = { room: "jammed", door: "jammed" };
-    }
+    } */
   }
 
   connectDoor(currentDoor, nextRoom, nextDoor) {

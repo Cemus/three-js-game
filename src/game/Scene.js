@@ -25,6 +25,7 @@ export default class Scene {
     //Prompt
 
     this.scene = null;
+    this.handleWindowResizeBinded = null;
 
     this.isTheGamePaused = false;
     this.changingScene = false;
@@ -56,7 +57,8 @@ export default class Scene {
   async init() {
     //Listeners
 
-    window.addEventListener("resize", this.handleWindowResize.bind(this));
+    this.handleWindowResizeBinded = this.handleWindowResize.bind(this);
+    window.addEventListener("resize", this.handleWindowResizeBinded);
 
     //Panel framerate
     this.stats.showPanel(0);
@@ -182,7 +184,8 @@ export default class Scene {
   async destroy() {
     this.changingScene = true;
     //Listeners
-    window.removeEventListener("resize", this.handleWindowResize.bind(this));
+    window.removeEventListener("resize", this.handleWindowResizeBinded);
+
     this.player.destroy();
     //Remove objects
     this.light = null;
