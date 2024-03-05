@@ -106,4 +106,9 @@ export default class Player {
     }
     this.movement.update();
   }
+
+  destroy() {
+    document.removeEventListener("keydown", this.movement.onKeyDown);
+    document.removeEventListener("keyup", this.movement.onKeyUp);
+  }
 }

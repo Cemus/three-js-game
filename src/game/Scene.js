@@ -181,7 +181,7 @@ export default class Scene {
     this.changingScene = true;
     //Listeners
     window.removeEventListener("resize", this.handleWindowResize.bind(this));
-
+    this.player.destroy();
     //Remove objects
     this.light = null;
     this.camera = null;

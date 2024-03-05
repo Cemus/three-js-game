@@ -7,6 +7,7 @@ export default class Game {
     this.scene = null;
     this.playerSpawningZone = 0;
     this.currentRoomURL = "../../assets/rooms/entranceRoom.gltf";
+    this.firstInitialisation = true;
     this.inventory = new Inventory(this);
     this.interact = new Interact(this);
   }
@@ -23,8 +24,11 @@ export default class Game {
   startGame() {
     this.interact.hasInteracted = false;
     this.scene.animate();
-    this.interact.init();
-    this.inventory.init();
+    if (this.firstInitialisation) {
+      this.interact.init();
+      this.inventory.init();
+    }
+    this.firstInitialisation = false;
   }
 
   setPlayerSpawningZone(zone) {
