@@ -74,8 +74,6 @@ export default class Scene {
     this.level = await this.loader.loadModel(this.currentRoomURL);
     await this.setupInterractiveObjectsProperties();
     this.addToScene(this.level);
-    console.log(this.playerSpawningZoneList);
-    console.log(this.playerSpawningZoneNumber);
 
     //Character
     this.player = new Player(
@@ -183,11 +181,11 @@ export default class Scene {
 
   async destroy() {
     this.changingScene = true;
-    //Listeners
+    //Dom
     window.removeEventListener("resize", this.handleWindowResizeBinded);
-
-    this.player.destroy();
+    document.body.removeChild(this.stats.dom);
     //Remove objects
+    this.player.destroy();
     this.light = null;
     this.camera = null;
     this.stats = null;
@@ -198,6 +196,7 @@ export default class Scene {
       node.remove();
     });
     const canvas = this.renderer.domElement;
+
     canvas.parentNode.removeChild(canvas);
     this.scene = null;
   }

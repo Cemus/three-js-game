@@ -15,19 +15,23 @@ export default class Game {
     this.rooms = [];
   }
 
+  findRoomFromIndex() {
+    return this.rooms.findIndex(
+      (room) => room.roomIndex === this.currentRoomIndex
+    );
+  }
+
   async init() {
     if (this.firstInitialisation) {
       this.rooms = await this.labyrinth.init();
+      const currentRoomDoorCount =
+        this.rooms[this.findRoomFromIndex()].doorCount;
+      this.playerSpawningZone = Math.floor(
+        Math.random() * currentRoomDoorCount
+      );
     }
-    const potentialSpawningZones = Object.keys(
-      this.rooms[this.currentRoomIndex].connectedDoors
-    );
-    this.playerSpawningZone = parseInt(potentialSpawningZones[0]);
-
-    console.log("game p spawning zone:", this.playerSpawningZone);
-    console.log("game rooms", this.rooms);
     this.scene = new Scene(
-      this.rooms[this.currentRoomIndex].roomURL,
+      this.rooms[this.findRoomFromIndex()].roomURL,
       this.playerSpawningZone,
       this.setPlayerSpawningZone.bind(this),
       this.interact.displayInteractPrompt.bind(this.interact)
@@ -36,6 +40,7 @@ export default class Game {
     this.startGame();
   }
   startGame() {
+    console.log(this.rooms);
     this.interact.hasInteracted = false;
     this.scene.animate();
     if (this.firstInitialisation) {

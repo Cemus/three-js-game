@@ -37,8 +37,8 @@ export default class LabyrinthGenerator {
       const currentRoom = rooms[i];
       const nextRoom = rooms[i + 1];
 
-      const currentDoor = Math.floor(Math.random() * currentRoom.doorCount) + 1;
-      const nextDoor = Math.floor(Math.random() * nextRoom.doorCount) + 1;
+      const currentDoor = Math.floor(Math.random() * currentRoom.doorCount);
+      const nextDoor = Math.floor(Math.random() * nextRoom.doorCount);
 
       currentRoom.connectDoor(currentDoor, nextRoom, nextDoor);
       nextRoom.connectDoor(nextDoor, currentRoom, currentDoor);
@@ -54,16 +54,12 @@ class Room {
     this.doorCount = doorCount;
     this.roomURL = roomURL;
     this.connectedDoors = {};
-
-    /*     for (let i = 0; i < doorCount; i++) {
-      this.connectedDoors[i] = { room: "jammed", door: "jammed" };
-    } */
   }
 
   connectDoor(currentDoor, nextRoom, nextDoor) {
     this.connectedDoors[currentDoor] = {
-      room: nextRoom.roomIndex,
-      door: nextDoor,
+      nextRoomIndex: nextRoom.roomIndex,
+      nextDoor: nextDoor,
     };
   }
 }

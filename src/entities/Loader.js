@@ -32,7 +32,7 @@ export default class Loader {
           resolve(model);
         },
         (xhr) => {
-          console.log(`${url} ${(xhr.loaded / xhr.total) * 100} % chargé`);
+          /*           console.log(`${url} ${(xhr.loaded / xhr.total) * 100} % chargé`); */
         },
         (error) => {
           console.error("Erreur de chargement du modèle GLTF:", error);
@@ -50,7 +50,7 @@ export default class Loader {
       });
 
       (xhr) => {
-        console.log((xhr.loaded / xhr.total) * 100 + "% chargé");
+        /*         console.log((xhr.loaded / xhr.total) * 100 + "% chargé"); */
       },
         (error) => {
           console.error("Erreur de chargement du modèle GLTF:", error);

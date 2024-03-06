@@ -35,20 +35,13 @@ export default class Interact {
     this.isInteractPromptToggled = true;
     if (interactiveObjectName.includes("doorTrigger")) {
       const objectFromName = interactiveObjectName.split("_")[1];
-
-      console.log("door", objectFromName);
-      const currentRoom = this.game.rooms[this.game.currentRoomIndex];
-      console.log("cur", currentRoom);
-      console.log(this.doorInteractingWith);
+      const findCurrentRoomIndex = this.game.rooms.findIndex(
+        (room) => room.roomIndex === this.game.currentRoomIndex
+      );
+      const currentRoom = this.game.rooms[findCurrentRoomIndex];
       const doorInfo = currentRoom.connectedDoors[objectFromName];
-      console.log("info", doorInfo);
-      const nextRoomIndex = doorInfo.room;
-      console.log("next r", nextRoomIndex);
-      const nextDoorNumber = doorInfo.door;
-      console.log("next d", nextDoorNumber);
-
-      this.doorInteractingWith = doorInfo;
-      if (nextRoomIndex !== "jammed") {
+      if (doorInfo) {
+        this.doorInteractingWith = doorInfo;
         this.changeLevelListener();
       } else {
         this.inspectedObject = "jammed";
@@ -70,9 +63,9 @@ export default class Interact {
     if (event.code == "Space" && !this.hasInteracted) {
       this.isInteractPromptToggled = false;
       this.hasInteracted = true;
-
-      this.game.currentRoomIndex = this.doorInteractingWith.room;
-      this.game.playerSpawningZone = this.doorInteractingWith.door;
+      console.log("Door interacting with", this.doorInteractingWith);
+      this.game.currentRoomIndex = this.doorInteractingWith.nextRoomIndex;
+      this.game.playerSpawningZone = this.doorInteractingWith.nextDoor;
       await this.game.scene.destroy();
       this.game.scene = null;
       this.game.init();

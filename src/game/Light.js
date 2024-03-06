@@ -24,7 +24,6 @@ export default class Light {
     this.scene.addToScene(directionalLight);
     this.scene.level.traverse((node) => {
       if (node.name.includes("light")) {
-        console.log(node);
         const pointLight = new THREE.PointLight("white", 1, 500, 1);
         pointLight.castShadow = true;
         pointLight.position.x = node.position.x;
