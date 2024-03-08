@@ -12,12 +12,14 @@ import Light from "./Light";
 
 export default class Scene {
   constructor(
-    currentRoomURL,
+    rooms,
+    currentRoom,
     playerSpawningZoneNumber,
     setPlayerSpawningZone,
     toggleInteractPrompt
   ) {
-    this.currentRoomURL = currentRoomURL;
+    this.currentRoom = currentRoom;
+    console.log(this.currentRoom);
     this.playerSpawningZoneNumber = playerSpawningZoneNumber;
     this.setPlayerSpawningZone = setPlayerSpawningZone;
     this.toggleInteractPrompt = toggleInteractPrompt;
@@ -71,7 +73,7 @@ export default class Scene {
 
     //Level
 
-    this.level = await this.loader.loadModel(this.currentRoomURL);
+    this.level = await this.loader.loadModel(this.currentRoom.roomURL);
     await this.setupInterractiveObjectsProperties();
     this.addToScene(this.level);
 
@@ -121,7 +123,7 @@ export default class Scene {
     const tempTriggerList = [];
     const tempPlayerSpawningZoneList = [];
 
-    this.level.traverse((node) => {
+    this.level.traverse(async (node) => {
       //Spawn
       if (node.name.startsWith("playerSpawningZone")) {
         const playerSpawningZoneNumber = node.name.slice("_")[1];
@@ -137,9 +139,31 @@ export default class Scene {
       }
       //General Triggers
       if (node.name.includes("Trigger")) {
-        const triggerNumber = node.name.slice("_")[1];
+        const triggerNumber = node.name.split("_")[1];
         node.userData.collider = new THREE.Box3().setFromObject(node);
         tempTriggerList.push({ node, number: triggerNumber });
+      }
+      //Items
+      if (node.name.includes("itemSlot")) {
+        console.log(node.name);
+        const slotNumber = node.name.split("_")[1];
+        console.log(slotNumber);
+        node.userData.collider = new THREE.Box3().setFromObject(node);
+        node.visible = false;
+        console.log(slotNumber);
+        const currentRoomSlot = this.currentRoom.itemSlots[slotNumber];
+        console.log(currentRoomSlot);
+        if (currentRoomSlot !== null) {
+          const item = await this.loader.loadModel(
+            `../../assets/rooms/${currentRoomSlot}.gltf`
+          );
+
+          this.scene.add(item);
+          const spawnPosition = node.position.clone();
+          const spawnRotation = node.rotation.clone();
+          item.rotation.copy(spawnRotation);
+          item.position.copy(spawnPosition);
+        }
       }
     });
 

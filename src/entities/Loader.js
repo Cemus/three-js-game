@@ -23,16 +23,18 @@ export default class Loader {
             if (
               node.userData.name === "light" ||
               node.name.includes("camera") ||
-              node.name.includes("Trigger")
+              node.name.includes("Trigger") ||
+              node.name.includes("itemSlot") /* ||
+              node.name.includes("playerSpawningZone") */
             ) {
               node.visible = false;
             }
           });
-
+          console.log(model);
           resolve(model);
         },
         (xhr) => {
-          /*           console.log(`${url} ${(xhr.loaded / xhr.total) * 100} % chargé`); */
+          console.log(`${url} ${(xhr.loaded / xhr.total) * 100} % chargé`);
         },
         (error) => {
           console.error("Erreur de chargement du modèle GLTF:", error);

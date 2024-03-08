@@ -31,7 +31,8 @@ export default class Game {
       );
     }
     this.scene = new Scene(
-      this.rooms[this.findRoomFromIndex()].roomURL,
+      this.rooms,
+      this.rooms[this.findRoomFromIndex()],
       this.playerSpawningZone,
       this.setPlayerSpawningZone.bind(this),
       this.interact.displayInteractPrompt.bind(this.interact)
