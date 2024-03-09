@@ -31,7 +31,6 @@ export default class Game {
       );
     }
     this.scene = new Scene(
-      this.rooms,
       this.rooms[this.findRoomFromIndex()],
       this.playerSpawningZone,
       this.setPlayerSpawningZone.bind(this),
@@ -41,7 +40,6 @@ export default class Game {
     this.startGame();
   }
   startGame() {
-    console.log(this.rooms);
     this.interact.hasInteracted = false;
     this.scene.animate();
     if (this.firstInitialisation) {

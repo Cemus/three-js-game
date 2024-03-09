@@ -84,6 +84,10 @@ export default class PlayerCollision {
         if (objectName.includes("doorTrigger")) {
           this.player.toggleInteractPrompt(objectName);
         }
+        if (objectName.includes("itemSlot")) {
+          console.log("test");
+          this.player.toggleInteractPrompt(objectName);
+        }
       }
     }
   }

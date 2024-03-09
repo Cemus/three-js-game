@@ -84,7 +84,6 @@ export default class Player {
       node.castShadow = true;
       node.receiveShadow = true;
     });
-    console.log(this.playerSpawningZone);
     const spawnPosition = this.playerSpawningZone.position.clone();
     const spawnRotation = this.playerSpawningZone.rotation.clone();
 

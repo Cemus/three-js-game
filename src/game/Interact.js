@@ -63,10 +63,7 @@ export default class Interact {
     if (event.code == "Space" && !this.hasInteracted) {
       this.isInteractPromptToggled = false;
       this.hasInteracted = true;
-      console.log("Door interacting with", this.doorInteractingWith);
       this.game.currentRoomIndex = this.doorInteractingWith.nextRoomIndex;
-      console.log(this.doorInteractingWith.nextRoomIndex);
-      console.log(this.doorInteractingWith.nextDoor);
       this.game.playerSpawningZone = this.doorInteractingWith.nextDoor;
       await this.game.scene.destroy();
       this.game.scene = null;

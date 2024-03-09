@@ -8,29 +8,9 @@ export default class Loader {
       const loader = new GLTFLoader();
       loader.load(
         url,
-        (gltf) => {
-          const model = gltf.scene;
-          model.traverse((node) => {
-            if (node.isMesh) {
-              if (node.name.startsWith("solid_")) {
-                node.userData.isSolid = true;
-              } else {
-                node.userData.isSolid = false;
-              }
-              node.castShadow = true;
-              node.receiveShadow = true;
-            }
-            if (
-              node.userData.name === "light" ||
-              node.name.includes("camera") ||
-              node.name.includes("Trigger") ||
-              node.name.includes("itemSlot") /* ||
-              node.name.includes("playerSpawningZone") */
-            ) {
-              node.visible = false;
-            }
-          });
-          console.log(model);
+        async (gltf) => {
+          let model = gltf.scene;
+          await this.loadedModelOptimization(model);
           resolve(model);
         },
         (xhr) => {
@@ -58,6 +38,29 @@ export default class Loader {
           console.error("Erreur de chargement du modèle GLTF:", error);
           reject(error);
         };
+    });
+  }
+
+  async loadedModelOptimization(model) {
+    model.traverse((node) => {
+      if (node.isMesh) {
+        if (node.name.startsWith("solid_")) {
+          node.userData.isSolid = true;
+        } else {
+          node.userData.isSolid = false;
+        }
+        node.castShadow = true;
+        node.receiveShadow = true;
+      }
+      if (
+        node.userData.name === "light" ||
+        node.name.includes("camera") ||
+        node.name.includes("Trigger") ||
+        node.name.includes("itemSlot") ||
+        node.name.includes("playerSpawningZone")
+      ) {
+        node.visible = false;
+      }
     });
   }
 }

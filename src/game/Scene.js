@@ -12,14 +12,12 @@ import Light from "./Light";
 
 export default class Scene {
   constructor(
-    rooms,
     currentRoom,
     playerSpawningZoneNumber,
     setPlayerSpawningZone,
     toggleInteractPrompt
   ) {
     this.currentRoom = currentRoom;
-    console.log(this.currentRoom);
     this.playerSpawningZoneNumber = playerSpawningZoneNumber;
     this.setPlayerSpawningZone = setPlayerSpawningZone;
     this.toggleInteractPrompt = toggleInteractPrompt;
@@ -143,16 +141,12 @@ export default class Scene {
         node.userData.collider = new THREE.Box3().setFromObject(node);
         tempTriggerList.push({ node, number: triggerNumber });
       }
-      //Items
+      //Item generation
       if (node.name.includes("itemSlot")) {
-        console.log(node.name);
         const slotNumber = node.name.split("_")[1];
-        console.log(slotNumber);
         node.userData.collider = new THREE.Box3().setFromObject(node);
         node.visible = false;
-        console.log(slotNumber);
         const currentRoomSlot = this.currentRoom.itemSlots[slotNumber];
-        console.log(currentRoomSlot);
         if (currentRoomSlot !== null) {
           const item = await this.loader.loadModel(
             `../../assets/rooms/${currentRoomSlot}.gltf`
@@ -217,6 +211,9 @@ export default class Scene {
     this.loader = null;
     this.player = null;
     this.level.traverse((node) => {
+      node.remove();
+    });
+    this.scene.traverse((node) => {
       node.remove();
     });
     const canvas = this.renderer.domElement;
