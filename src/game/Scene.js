@@ -46,7 +46,7 @@ export default class Scene {
     this.level = null;
 
     this.solidInstanceList = [];
-    this.triggerList = [];
+    this.triggerList = { cameras: [], doors: [], items: [] };
     this.playerSpawningZoneList = [];
 
     //Framerate lock
@@ -118,8 +118,9 @@ export default class Scene {
   }
 
   async setupInterractiveObjectsProperties() {
-    const tempTriggerList = [];
+    const tempCameraTriggerList = [];
     const tempPlayerSpawningZoneList = [];
+    const tempDoorTriggerList = [];
 
     this.level.traverse(async (node) => {
       //Spawn
@@ -135,39 +136,57 @@ export default class Scene {
         node.userData.collider = new THREE.Box3().setFromObject(node);
         this.solidInstanceList.push(node);
       }
-      //General Triggers
-      if (node.name.includes("Trigger")) {
+
+      //Triggers
+      //Camera triggers
+      if (node.name.includes("cameraTrigger")) {
         const triggerNumber = node.name.split("_")[1];
         node.userData.collider = new THREE.Box3().setFromObject(node);
-        tempTriggerList.push({ node, number: triggerNumber });
+        tempCameraTriggerList.push({ node, number: triggerNumber });
+      }
+      //Door triggers
+      if (node.name.includes("doorTrigger")) {
+        const triggerNumber = node.name.split("_")[1];
+        node.userData.collider = new THREE.Box3().setFromObject(node);
+        tempDoorTriggerList.push({ node, number: triggerNumber });
       }
       //Item generation
       if (node.name.includes("itemSlot")) {
         const slotNumber = node.name.split("_")[1];
-        node.userData.collider = new THREE.Box3().setFromObject(node);
-        node.visible = false;
+        const itemsCollider = new THREE.Box3().setFromObject(node);
         const currentRoomSlot = this.currentRoom.itemSlots[slotNumber];
         if (currentRoomSlot !== null) {
           const item = await this.loader.loadModel(
             `../../assets/rooms/${currentRoomSlot}.gltf`
           );
-
-          this.scene.add(item);
-          const spawnPosition = node.position.clone();
-          const spawnRotation = node.rotation.clone();
-          item.rotation.copy(spawnRotation);
-          item.position.copy(spawnPosition);
+          item.traverse((itemsNode) => {
+            if (itemsNode.name.includes("item")) {
+              this.scene.add(itemsNode);
+              const spawnPosition = node.position.clone();
+              const spawnRotation = node.rotation.clone();
+              itemsNode.userData.collider = itemsCollider;
+              itemsNode.rotation.copy(spawnRotation);
+              itemsNode.position.copy(spawnPosition);
+              this.triggerList.items.push(itemsNode);
+            }
+          });
         }
       }
     });
 
     tempPlayerSpawningZoneList.sort((a, b) => a.number - b.number);
-    tempTriggerList.sort((a, b) => a.number - b.number);
+    tempCameraTriggerList.sort((a, b) => a.number - b.number);
+    tempDoorTriggerList.sort((a, b) => a.number - b.number);
 
     this.playerSpawningZoneList.push(
       ...tempPlayerSpawningZoneList.map((entry) => entry.node)
     );
-    this.triggerList.push(...tempTriggerList.map((entry) => entry.node));
+    this.triggerList.cameras.push(
+      ...tempCameraTriggerList.map((entry) => entry.node)
+    );
+    this.triggerList.doors.push(
+      ...tempDoorTriggerList.map((entry) => entry.node)
+    );
   }
 
   setupRenderer() {

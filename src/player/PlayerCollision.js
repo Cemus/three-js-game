@@ -65,29 +65,40 @@ export default class PlayerCollision {
   }
 
   checkTriggerCollisions(triggerList) {
-    for (const object of triggerList) {
-      if (this.player.collider.intersectsBox(object.userData.collider)) {
-        return true;
+    for (const key in triggerList) {
+      if (Object.hasOwnProperty.call(triggerList, key)) {
+        const triggerArray = triggerList[key];
+        for (const object of triggerArray) {
+          if (this.player.collider.intersectsBox(object.userData.collider)) {
+            return true;
+          }
+        }
       }
     }
     return false;
   }
 
   handleTriggerCollisions(triggerList) {
-    for (const object of triggerList) {
+    const cameraTriggers = triggerList.cameras;
+    const doorTriggers = triggerList.doors;
+    const itemTriggers = triggerList.items;
+    for (const object of cameraTriggers) {
       if (this.player.collider.intersectsBox(object.userData.collider)) {
         const objectName = object.name;
-        if (objectName.includes("cameraTrigger")) {
-          const cameraNumber = objectName.substring("cameraTrigger".length);
-          this.player.cameraTriggerActivation(parseInt(cameraNumber));
-        }
-        if (objectName.includes("doorTrigger")) {
-          this.player.toggleInteractPrompt(objectName);
-        }
-        if (objectName.includes("itemSlot")) {
-          console.log("test");
-          this.player.toggleInteractPrompt(objectName);
-        }
+        const cameraNumber = objectName.split("_")[1];
+        this.player.cameraTriggerActivation(parseInt(cameraNumber));
+      }
+    }
+    for (const object of doorTriggers) {
+      if (this.player.collider.intersectsBox(object.userData.collider)) {
+        const objectName = object.name;
+        this.player.toggleInteractPrompt(objectName);
+      }
+    }
+    for (const object of itemTriggers) {
+      if (this.player.collider.intersectsBox(object.userData.collider)) {
+        const objectName = object.name;
+        this.player.toggleInteractPrompt(objectName);
       }
     }
   }

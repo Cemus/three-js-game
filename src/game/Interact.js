@@ -4,13 +4,18 @@ export default class Interact {
 
     this.hasInteracted = false;
     this.isInteractPromptToggled = false;
+
+    this.interactMessageContainer = document.getElementById(
+      "interactMessageContainer"
+    );
     this.interactMessage = document.getElementById("interactMessage");
-    this.inspectionMessage = document.getElementById("inspectionMessage");
+    this.choiceContainer = document.getElementById("choiceContainer");
 
     this.inspectedObject = null;
 
     this.changeLevelListeners = [];
     this.inspectListeners = [];
+    this.takeItemListeners = [];
 
     this.doorInteractingWith = null;
   }
@@ -25,29 +30,46 @@ export default class Interact {
 
   displayInteractPrompt(interactiveObjectName) {
     if (!this.isInteractPromptToggled) {
+      this.showInteractPrompt();
       this.isInteractPromptToggled = true;
-      this.interactMessage.style.display = "block";
+      this.interactMessage.innerHTML = "Interact";
       this.contextualAction(interactiveObjectName);
     }
   }
 
   contextualAction(interactiveObjectName) {
     this.isInteractPromptToggled = true;
+    console.log(interactiveObjectName);
     if (interactiveObjectName.includes("doorTrigger")) {
-      const objectFromName = interactiveObjectName.split("_")[1];
-      const findCurrentRoomIndex = this.game.rooms.findIndex(
-        (room) => room.roomIndex === this.game.currentRoomIndex
-      );
-      const currentRoom = this.game.rooms[findCurrentRoomIndex];
-      const doorInfo = currentRoom.connectedDoors[objectFromName];
-      if (doorInfo) {
-        this.doorInteractingWith = doorInfo;
-        this.changeLevelListener();
-      } else {
-        this.inspectedObject = "jammed";
-        this.inspectListener();
-      }
+      this.handleDoors(interactiveObjectName);
     }
+
+    if (interactiveObjectName.includes("item")) {
+      this.handleItems(interactiveObjectName);
+    }
+  }
+
+  handleDoors(interactiveObjectName) {
+    console.log("test");
+    const objectFromName = interactiveObjectName.split("_")[1];
+    const findCurrentRoomIndex = this.game.rooms.findIndex(
+      (room) => room.roomIndex === this.game.currentRoomIndex
+    );
+    const currentRoom = this.game.rooms[findCurrentRoomIndex];
+    const doorInfo = currentRoom.connectedDoors[objectFromName];
+    if (doorInfo) {
+      this.doorInteractingWith = doorInfo;
+      this.changeLevelListener();
+    } else {
+      this.inspectedObject = "jammed";
+      this.inspectListener();
+    }
+  }
+
+  handleItems(interactiveObjectName) {
+    const objectFromName = interactiveObjectName.split("_")[1];
+    this.inspectedObject = objectFromName;
+    this.takeItemListener();
   }
 
   changeLevelListener() {
@@ -79,22 +101,54 @@ export default class Interact {
     }
   }
 
+  takeItemListener() {
+    const listener = (event) => this.takeItem(event, this.inspectedObject);
+    if (this.takeItemListeners.length === 0) {
+      document.addEventListener("keyup", listener);
+      this.takeItemListeners.push(listener);
+    }
+  }
+
   inspect(event) {
     this.hideInteractPrompt();
     if (event.code == "Space" && !this.hasInteracted) {
+      this.showInteractPrompt();
       this.game.pause(true);
       this.hasInteracted = true;
-      this.inspectionMessage.style.display = "block";
       switch (this.inspectedObject) {
         case "jammed":
-          this.inspectionMessage.innerHTML = "It's jammed";
+          this.interactMessage.innerHTML = "It's jammed";
           break;
         default:
       }
     } else if (event.code == "Space" && this.hasInteracted) {
       this.game.pause(false);
       this.hasInteracted = false;
-      this.inspectionMessage.style.display = "none";
+      this.hideInteractPrompt();
+    }
+  }
+
+  takeItem(event) {
+    this.hideInteractPrompt();
+    if (event.code == "Space" && !this.hasInteracted) {
+      this.showInteractPrompt();
+      this.game.pause(true);
+      this.hasInteracted = true;
+      console.log(this.inspectedObject);
+      switch (this.inspectedObject) {
+        case "healSmall":
+          this.interactMessage.innerHTML = `Take the <span class="green-text">health drink</span> ?`;
+          break;
+        case "key":
+          this.interactMessage.innerHTML = "Take the key ?";
+          break;
+        default:
+      }
+      this.choiceContainer.innerHTML = `<p class="choice selected">Yes</p> <p class="choice">No</p>`;
+    } else if (event.code == "Space" && this.hasInteracted) {
+      this.game.pause(false);
+      this.hasInteracted = false;
+      this.hideInteractPrompt();
     }
   }
 
@@ -105,8 +159,12 @@ export default class Interact {
     for (let i = 0; i < this.changeLevelListeners.length; i++) {
       document.removeEventListener("keyup", this.changeLevelListeners[i]);
     }
+    for (let i = 0; i < this.takeItemListeners.length; i++) {
+      document.removeEventListener("keyup", this.takeItemListeners[i]);
+    }
     this.inspectListeners = [];
     this.changeLevelListeners = [];
+    this.takeItemListeners = [];
   }
 
   hidePromptOnKeyPress() {
@@ -118,7 +176,12 @@ export default class Interact {
   }
 
   hideInteractPrompt() {
-    this.interactMessage.style.display = "none";
+    this.interactMessageContainer.style.display = "none";
+    this.choiceContainer.style.display = "none";
     this.isInteractPromptToggled = false;
+  }
+
+  showInteractPrompt() {
+    this.interactMessageContainer.style.display = "flex";
   }
 }
