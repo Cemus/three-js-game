@@ -279,7 +279,7 @@ export default class Interact {
   async deleteItemFromRoom() {
     this.game.removeItemFromRoom(this.inspectedItem);
 
-    const nodeToDelete = await this.game.scene.findNodeByUUIDz(
+    const nodeToDelete = await this.game.scene.findNodeByUUID(
       this.inspectedItem
     );
 
