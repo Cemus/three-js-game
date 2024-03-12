@@ -276,31 +276,15 @@ export default class Interact {
     this.game.inventory.slots.push(this.inspectedItem);
   }
 
-  deleteItemFromRoom() {
-    const findCurrentRoomIndex = this.game.rooms.findIndex(
-      (room) => room.roomIndex === this.game.currentRoomIndex
+  async deleteItemFromRoom() {
+    this.game.removeItemFromRoom(this.inspectedItem);
+
+    const nodeToDelete = await this.game.scene.findNodeByUUID(
+      this.inspectedItem
     );
-    const currentRoom = this.game.rooms[findCurrentRoomIndex];
-    for (let i = 0; i < currentRoom.itemSlots.length; i++) {
-      if (currentRoom.itemSlots[i]) {
-        if (currentRoom.itemSlots[i].index === this.inspectedItem.index)
-          this.game.rooms[findCurrentRoomIndex].itemSlots[i] = null;
-        break;
-      }
-    }
-    //Pas opti
-    let nodeToDelete = null;
-    this.game.scene.scene.traverse((node) => {
-      if (node.name) {
-        if (node.name.split("_")[1] == this.inspectedItem.name) {
-          if (node.userData.item.uuid === this.inspectedItem.uuid) {
-            nodeToDelete = node;
-          }
-        }
-      }
-    });
+
     if (nodeToDelete) {
-      this.game.scene.scene.remove(nodeToDelete);
+      this.game.scene.removeFromSceneWithOptions(nodeToDelete, false);
     }
   }
 }

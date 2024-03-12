@@ -56,7 +56,6 @@ export default class Scene {
   }
   async init() {
     //Listeners
-
     this.handleWindowResizeBinded = this.handleWindowResize.bind(this);
     window.addEventListener("resize", this.handleWindowResizeBinded);
 
@@ -234,15 +233,52 @@ export default class Scene {
     this.clock = null;
     this.loader = null;
     this.player = null;
-    this.level.traverse((node) => {
-      node.remove();
-    });
-    this.scene.traverse((node) => {
-      node.remove();
-    });
+    this.removeFromSceneWithOptions(null, true);
     const canvas = this.renderer.domElement;
 
     canvas.parentNode.removeChild(canvas);
     this.scene = null;
+  }
+
+  async findNodeByUUID(target) {
+    console.log(target);
+    for (let i = 0; i < this.scene.children.length; i++) {
+      const child = this.scene.children[i];
+      if (child.uuid === target.uuid) {
+        return child;
+      }
+    }
+    return null;
+  }
+
+  removeFromSceneWithOptions(object, removeAll) {
+    for (let i = 0; i < this.scene.children.length; i++) {
+      const child = this.scene.children[i];
+      if (removeAll) {
+        this.deleteNodeFromScene(child);
+      } else {
+        if (child === object) {
+          this.deleteNodeFromScene(child);
+        }
+      }
+    }
+  }
+
+  deleteNodeFromScene(node) {
+    if (!(node instanceof THREE.Object3D)) return false;
+    if (node.geometry) {
+      node.geometry.dispose();
+    }
+    if (node.material) {
+      if (node.material instanceof Array) {
+        node.material.forEach((material) => material.dispose());
+      } else {
+        node.material.dispose();
+      }
+    }
+    if (node.parent) {
+      node.parent.remove(node);
+    }
+    return true;
   }
 }

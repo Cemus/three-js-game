@@ -47,6 +47,7 @@ export default class Game {
       this.inventory.init();
     }
     this.firstInitialisation = false;
+    console.log(this.rooms);
   }
 
   setPlayerSpawningZone(zone) {
@@ -61,6 +62,21 @@ export default class Game {
     if (!pause) {
       this.scene.player.setupListeners();
     }
+  }
+
+  removeItemFromRoom(item) {
+    const currentRoom = this.rooms[this.currentRoomIndex];
+    console.log(currentRoom);
+    for (let i = 0; i < currentRoom.itemSlots.length; i++) {
+      if (currentRoom.itemSlots[i]) {
+        if (currentRoom.itemSlots[i].index === item.index) {
+          console.log("supp");
+          currentRoom.itemSlots[i] = null;
+          break;
+        }
+      }
+    }
+    console.log(currentRoom);
   }
 }
 
