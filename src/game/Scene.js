@@ -103,10 +103,12 @@ export default class Scene {
           this.player.update(this.solidInstanceList, this.triggerList);
           TWEEN.update();
           this.camera.handleCameraModes();
-          this.composer.render(this.scene, this.camera.currentCamera.camera);
           this.lastFrameTime =
             currentTime - (elapsedFrameTime % this.frameDelay);
+        } else {
+          this.player.removeListeners();
         }
+        this.composer.render(this.scene, this.camera.currentCamera.camera);
       }
       requestAnimationFrame(this.animate.bind(this));
       this.stats.end();
@@ -154,17 +156,20 @@ export default class Scene {
       if (node.name.includes("itemSlot")) {
         const slotNumber = node.name.split("_")[1];
         const itemsCollider = new THREE.Box3().setFromObject(node);
-        const currentRoomSlot = this.currentRoom.itemSlots[slotNumber];
-        if (currentRoomSlot !== null) {
+        const currentRoomSlotItem = this.currentRoom.itemSlots[slotNumber];
+        if (currentRoomSlotItem !== null) {
           const item = await this.loader.loadModel(
-            `../../assets/rooms/${currentRoomSlot}.gltf`
+            `../../assets/rooms/${currentRoomSlotItem.name}.gltf`
           );
           item.traverse((itemsNode) => {
             if (itemsNode.name.includes("item")) {
+              currentRoomSlotItem.uuid = itemsNode.uuid;
               this.scene.add(itemsNode);
               const spawnPosition = node.position.clone();
               const spawnRotation = node.rotation.clone();
               itemsNode.userData.collider = itemsCollider;
+              itemsNode.userData.uuid = itemsNode.uuid;
+              itemsNode.userData.item = currentRoomSlotItem;
               itemsNode.rotation.copy(spawnRotation);
               itemsNode.position.copy(spawnPosition);
               this.triggerList.items.push(itemsNode);

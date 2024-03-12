@@ -97,8 +97,8 @@ export default class PlayerCollision {
     }
     for (const object of itemTriggers) {
       if (this.player.collider.intersectsBox(object.userData.collider)) {
-        const objectName = object.name;
-        this.player.toggleInteractPrompt(objectName);
+        const item = object.userData.item;
+        this.player.toggleInteractPrompt(item);
       }
     }
   }

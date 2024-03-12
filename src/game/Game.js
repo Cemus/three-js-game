@@ -53,11 +53,14 @@ export default class Game {
     this.playerSpawningZone = zone;
   }
 
-  pause(boolean) {
-    this.scene.isTheGamePaused = boolean;
+  pause(pause) {
+    this.scene.isTheGamePaused = pause;
     this.scene.instanceList.forEach((instance) => {
-      instance.isTheGamePaused = boolean;
+      instance.isTheGamePaused = pause;
     });
+    if (!pause) {
+      this.scene.player.setupListeners();
+    }
   }
 }
 

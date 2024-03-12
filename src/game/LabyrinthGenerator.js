@@ -20,13 +20,15 @@ export default class LabyrinthGenerator {
         itemSlots: [...Array(6).fill(null)],
       },
     ];
+
     this.LOneItemList = [
-      "smallHeal",
-      "smallHeal",
-      "key",
-      "smallHeal",
-      "smallHeal",
-      "key",
+      new Item("smallHeal", 1),
+      new Item("key", 1),
+      new Item("key", 1),
+      new Item("smallHeal", 1),
+      new Item("smallHeal", 1),
+      new Item("smallHeal", 1),
+      new Item("smallHeal", 1),
     ];
   }
 
@@ -104,5 +106,15 @@ class Room {
       nextRoomIndex: nextRoom.roomIndex,
       nextDoor: nextDoor,
     };
+  }
+}
+
+class Item {
+  static itemCount = 0;
+  constructor(name, amount) {
+    this.name = name;
+    this.amount = amount;
+    this.index = Item.itemCount++;
+    this.uuid = null;
   }
 }

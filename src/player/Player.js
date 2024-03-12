@@ -79,6 +79,11 @@ export default class Player {
     document.addEventListener("keyup", this.movement.onKeyUp);
   }
 
+  removeListeners() {
+    document.removeEventListener("keydown", this.movement.onKeyDown);
+    document.removeEventListener("keyup", this.movement.onKeyUp);
+  }
+
   setupModel() {
     this.model.traverse((node) => {
       node.castShadow = true;
