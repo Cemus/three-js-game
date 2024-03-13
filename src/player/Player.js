@@ -111,6 +111,20 @@ export default class Player {
     this.movement.update();
   }
 
+  resetPlayerStateDuringPause() {
+    this.removeListeners();
+    this.moveBackward = false;
+    this.moveForward = false;
+    this.rotateLeft = false;
+    this.rotateRight = false;
+    this.isRunning = false;
+    this.animation.toIdlePose();
+  }
+
+  resumePlayerStateAfterPause() {
+    this.setupListeners();
+  }
+
   destroy() {
     document.removeEventListener("keydown", this.movement.onKeyDown);
     document.removeEventListener("keyup", this.movement.onKeyUp);

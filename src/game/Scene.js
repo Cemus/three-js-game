@@ -104,8 +104,6 @@ export default class Scene {
           this.camera.handleCameraModes();
           this.lastFrameTime =
             currentTime - (elapsedFrameTime % this.frameDelay);
-        } else {
-          this.player.removeListeners();
         }
         this.composer.render(this.scene, this.camera.currentCamera.camera);
       }
@@ -241,7 +239,6 @@ export default class Scene {
   }
 
   async findNodeByUUID(target) {
-    console.log(target);
     for (let i = 0; i < this.scene.children.length; i++) {
       const child = this.scene.children[i];
       if (child.uuid === target.uuid) {

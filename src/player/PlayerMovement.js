@@ -56,6 +56,8 @@ export default class PlayerMovement {
     } else {
       this.player.isRunning = false;
     }
+    console.log("lancement du state transition");
+    console.log("state : ", this.player.currentState);
     this.player.animation.stateTransitionTrigger();
   }
 

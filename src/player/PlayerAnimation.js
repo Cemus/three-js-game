@@ -45,8 +45,13 @@ export default class PlayerAnimation {
     }
   }
 
+  toIdlePose() {
+    this.handleStateTransition("idle");
+  }
+
   handleStateTransition(newState) {
     const transitionDuration = 0.25;
+
     if (this.player.currentState !== newState) {
       const prevState = this.player.currentState;
       this.player.currentState = newState;
@@ -66,6 +71,7 @@ export default class PlayerAnimation {
 
       switch (this.player.currentState) {
         case "idle":
+          console.log("idle en cours");
           this.player.playerIdleAnim.time = this.player.animationTimeOnPause;
           this.player.playerIdleAnim.play();
           this.player.playerIdleAnim.setEffectiveTimeScale(1);
