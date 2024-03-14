@@ -71,7 +71,6 @@ export default class PlayerAnimation {
 
       switch (this.player.currentState) {
         case "idle":
-          console.log("idle en cours");
           this.player.playerIdleAnim.time = this.player.animationTimeOnPause;
           this.player.playerIdleAnim.play();
           this.player.playerIdleAnim.setEffectiveTimeScale(1);

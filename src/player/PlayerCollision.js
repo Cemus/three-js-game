@@ -82,10 +82,11 @@ export default class PlayerCollision {
     const cameraTriggers = triggerList.cameras;
     const doorTriggers = triggerList.doors;
     const itemTriggers = triggerList.items;
+    const itemBoxTrigers = triggerList.itemBox;
     for (const object of cameraTriggers) {
       if (this.player.collider.intersectsBox(object.userData.collider)) {
         const objectName = object.name;
-        const cameraNumber = objectName.split("_")[1];
+        const cameraNumber = parseInt(objectName.match(/\d+/)[0]);
         this.player.cameraTriggerActivation(parseInt(cameraNumber));
       }
     }
@@ -99,6 +100,11 @@ export default class PlayerCollision {
       if (this.player.collider.intersectsBox(object.userData.collider)) {
         const item = object.userData.item;
         this.player.toggleInteractPrompt(item);
+      }
+    }
+    for (const object of itemBoxTrigers) {
+      if (this.player.collider.intersectsBox(object.userData.collider)) {
+        this.player.toggleInteractPrompt("itemBox");
       }
     }
   }

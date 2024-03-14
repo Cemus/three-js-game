@@ -21,6 +21,7 @@ export default class Interact {
     this.inspectListeners = [];
     this.pickUpItemListeners = [];
     this.pickupItemChoiceListeners = [];
+    this.itemBoxListeners = [];
 
     this.doorInteractingWith = null;
   }
@@ -50,9 +51,31 @@ export default class Interact {
       if (interactiveObjectName.includes("doorTrigger")) {
         this.handleDoors(interactiveObjectName);
       }
+      if (interactiveObjectName.includes("itemBox")) {
+        this.setItemBoxListener();
+      }
+    }
+  }
+  handleItemBox(event) {
+    this.hideInteractPrompt();
+    if (event.code == "Space" && !this.hasInteracted) {
+      this.isInteractPromptToggled = false;
+      this.hasInteracted = true;
+      this.game.itemBox.display();
+    }
+    if (event.key.toUpperCase() === "E") {
+      this.game.itemBox.hide();
+      this.exitInteraction();
     }
   }
 
+  setItemBoxListener() {
+    const listener = (event) => this.handleItemBox(event);
+    if (this.itemBoxListeners.length === 0) {
+      document.addEventListener("keyup", listener);
+      this.itemBoxListeners.push(listener);
+    }
+  }
   handleDoors(interactiveObjectName) {
     const objectFromName = interactiveObjectName.split("_")[1];
     const findCurrentRoomIndex = this.game.rooms.findIndex(
@@ -62,10 +85,10 @@ export default class Interact {
     const doorInfo = currentRoom.connectedDoors[objectFromName];
     if (doorInfo) {
       this.doorInteractingWith = doorInfo;
-      this.changeLevelListener();
+      this.setChangeLevelListener();
     } else {
       this.inspectedObject = "jammed";
-      this.inspectListener();
+      this.setInspectListener();
     }
   }
 
@@ -74,7 +97,7 @@ export default class Interact {
     this.pickUpItemListener();
   }
 
-  changeLevelListener() {
+  setChangeLevelListener() {
     const listener = (event) => this.changeLevel(event);
     if (this.changeLevelListeners.length === 0) {
       document.addEventListener("keyup", listener);
@@ -95,7 +118,7 @@ export default class Interact {
     }
   }
 
-  inspectListener() {
+  setInspectListener() {
     const listener = (event) => this.inspect(event, this.inspectedObject);
     if (this.inspectListeners.length === 0) {
       document.addEventListener("keyup", listener);
@@ -133,9 +156,7 @@ export default class Interact {
         default:
       }
     } else if (event.code == "Space" && this.hasInteracted) {
-      this.game.pause(false);
-      this.hasInteracted = false;
-      this.hideInteractPrompt();
+      this.exitInteraction();
     }
   }
 
@@ -226,6 +247,10 @@ export default class Interact {
         this.deleteItemFromRoom();
       }
     }
+    this.exitInteraction();
+  }
+
+  exitInteraction() {
     this.isChoicePromptToggled = false;
     this.hasInteracted = false;
     this.hideInteractPrompt();
@@ -246,10 +271,14 @@ export default class Interact {
     for (let i = 0; i < this.pickupItemChoiceListeners.length; i++) {
       document.removeEventListener("keyup", this.pickupItemChoiceListeners[i]);
     }
+    for (let i = 0; i < this.itemBoxListeners.length; i++) {
+      document.removeEventListener("keyup", this.itemBoxListeners[i]);
+    }
     this.inspectListeners = [];
     this.changeLevelListeners = [];
     this.pickUpItemListeners = [];
     this.pickupItemChoiceListeners = [];
+    this.itemBoxListeners = [];
   }
 
   hidePromptOnKeyPress() {

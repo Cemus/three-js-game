@@ -46,7 +46,7 @@ export default class Scene {
     this.level = null;
 
     this.solidInstanceList = [];
-    this.triggerList = { cameras: [], doors: [], items: [] };
+    this.triggerList = { cameras: [], doors: [], items: [], itemBox: [] };
     this.playerSpawningZoneList = [];
 
     //Framerate lock
@@ -81,10 +81,10 @@ export default class Scene {
       this.toggleInteractPrompt
     );
     this.instanceList.push(this.player);
-    await this.player.init().then(() => {
+    await this.player.init(this.loader).then(() => {
       this.addToScene(this.player.model);
     });
-
+    console.log(this.player);
     //Render
     this.camera.init();
     this.light.init();
@@ -100,6 +100,7 @@ export default class Scene {
         this.player.animation.update(this.clock);
         if (!this.isTheGamePaused) {
           this.player.update(this.solidInstanceList, this.triggerList);
+
           TWEEN.update();
           this.camera.handleCameraModes();
           this.lastFrameTime =
@@ -120,6 +121,7 @@ export default class Scene {
     const tempCameraTriggerList = [];
     const tempPlayerSpawningZoneList = [];
     const tempDoorTriggerList = [];
+    const tempItemBoxTriggerList = [];
 
     this.level.traverse(async (node) => {
       //Spawn
@@ -149,10 +151,18 @@ export default class Scene {
         node.userData.collider = new THREE.Box3().setFromObject(node);
         tempDoorTriggerList.push({ node, number: triggerNumber });
       }
+      //Item box
+      if (node.name.includes("itemBox")) {
+        node.userData.collider = new THREE.Box3().setFromObject(node);
+        tempDoorTriggerList.push({ node });
+      }
       //Item generation
       if (node.name.includes("itemSlot")) {
         const slotNumber = node.name.split("_")[1];
         const itemsCollider = new THREE.Box3().setFromObject(node);
+        const helper = new THREE.Box3Helper(itemsCollider, 0xffff00);
+
+        this.addToScene(helper);
         const currentRoomSlotItem = this.currentRoom.itemSlots[slotNumber];
         if (currentRoomSlotItem !== null) {
           const item = await this.loader.loadModel(
@@ -188,6 +198,9 @@ export default class Scene {
     );
     this.triggerList.doors.push(
       ...tempDoorTriggerList.map((entry) => entry.node)
+    );
+    this.triggerList.itemBox.push(
+      ...tempItemBoxTriggerList.map((entry) => entry.node)
     );
   }
 

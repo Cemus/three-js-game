@@ -4,6 +4,8 @@ body {
   box-sizing: border-box;
 }
 
+/*Interact*/
+
 #interactMessageContainer {
   position: fixed;
   flex-direction: column;
@@ -44,6 +46,8 @@ body {
   border-radius: 0.5rem;
 }
 
+/*Inventory*/
+
 #inventory {
   display: none;
   flex-direction: row;
@@ -59,9 +63,32 @@ body {
   gap: 1rem;
 }
 
-.slot {
+#itemBox {
+  display: none;
+  flex-direction: row;
+  position: fixed;
+  bottom: 0;
   padding: 4rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  border-radius: 5px;
+  align-items: center;
+  justify-content: center;
+  min-width: 100%;
+  gap: 1rem;
+}
+
+.slot {
+  padding: 2rem;
   background-color: rgba(61, 61, 61, 09);
+  color: #fff;
+  border-radius: 5px;
+}
+
+.selectedSlot {
+  padding: 3rem;
+  background-color: rgba(61, 61, 61, 09);
+  border: 2px solid green;
   color: #fff;
   border-radius: 5px;
 }

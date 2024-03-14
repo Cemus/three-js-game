@@ -2,6 +2,7 @@ import Scene from "./Scene";
 import Inventory from "./Inventory";
 import Interact from "./Interact";
 import LabyrinthGenerator from "./LabyrinthGenerator";
+import ItemBox from "./ItemBox";
 
 export default class Game {
   constructor() {
@@ -12,6 +13,7 @@ export default class Game {
     this.inventory = new Inventory(this);
     this.interact = new Interact(this);
     this.labyrinth = new LabyrinthGenerator();
+    this.itemBox = new ItemBox(this.inventory);
     this.rooms = [];
   }
 

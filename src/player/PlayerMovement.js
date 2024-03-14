@@ -5,6 +5,7 @@ export default class PlayerMovement {
     this.player = player;
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
+    this.isQuickTurning = false;
   }
   onKeyDown(e) {
     const isShiftPressed = e.shiftKey;
@@ -15,6 +16,7 @@ export default class PlayerMovement {
         break;
       case "S":
         this.player.moveBackward = true;
+
         break;
       case "Q":
       case "A":
@@ -29,6 +31,10 @@ export default class PlayerMovement {
     } else {
       this.player.isRunning = false;
     }
+    if (this.player.moveBackward && isShiftPressed) {
+      this.triggerQuickTurn();
+    }
+
     this.player.animation.stateTransitionTrigger();
   }
 
@@ -41,7 +47,9 @@ export default class PlayerMovement {
         break;
       case "S":
         this.player.moveBackward = false;
-        this.checkDoubleBackwardPress();
+        if (isShiftUp) {
+          this.triggerQuickTurn();
+        }
         break;
       case "Q":
       case "A":
@@ -56,44 +64,12 @@ export default class PlayerMovement {
     } else {
       this.player.isRunning = false;
     }
-    console.log("lancement du state transition");
-    console.log("state : ", this.player.currentState);
+
     this.player.animation.stateTransitionTrigger();
   }
 
-  checkDoubleBackwardPress() {
-    const currentTime = performance.now();
-    const timeSinceLastPress = currentTime - this.lastBackwardKeyPressTime;
-
-    if (timeSinceLastPress < 200 && !this.isTheGamePaused) {
-      this.triggerQuickTurn();
-    }
-
-    this.lastBackwardKeyPressTime = currentTime;
-  }
-
-  triggerQuickTurn() {
-    const targetRotation = this.player.model.rotation.y + Math.PI;
-    let quickTurnProgress = 0;
-    const quickTurnSpeed = 0.02;
-
-    const updateQuickTurn = () => {
-      quickTurnProgress += quickTurnSpeed;
-      this.player.model.rotation.y = THREE.MathUtils.lerp(
-        this.player.model.rotation.y,
-        targetRotation,
-        quickTurnProgress
-      );
-
-      if (quickTurnProgress < 0.5) {
-        requestAnimationFrame(updateQuickTurn);
-      }
-    };
-
-    updateQuickTurn();
-  }
-
   update() {
+    const currentRotation = this.player.model.rotation.y;
     const rotationSpeed = 0.06;
     const normalSpeed = 4;
     const backwardSpeed = 2.5;
@@ -135,5 +111,16 @@ export default class PlayerMovement {
       rotationDirection -= rotationSpeed;
     }
     this.player.model.rotateY(rotationDirection);
+  }
+  triggerQuickTurn() {
+    if (!this.isQuickTurning) {
+      this.isQuickTurning = true;
+      const currentRotation = this.player.model.rotation.y;
+      let targetRotation = currentRotation - Math.PI;
+      this.player.model.rotation.y = targetRotation;
+      setTimeout(() => {
+        this.isQuickTurning = false;
+      }, 1000);
+    }
   }
 }
