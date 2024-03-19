@@ -7,13 +7,16 @@ import ItemBox from "./ItemBox";
 export default class Game {
   constructor() {
     this.scene = null;
+    this.inventory = null;
     this.playerSpawningZone = null;
     this.currentRoomIndex = 0;
     this.firstInitialisation = true;
-    this.inventory = new Inventory(this);
-    this.interact = new Interact(this);
+
     this.labyrinth = new LabyrinthGenerator();
-    this.itemBox = new ItemBox(this.inventory);
+    this.itemBox = new ItemBox(this);
+    this.inventory = new Inventory(this);
+
+    this.interact = new Interact(this);
     this.rooms = [];
   }
 
@@ -39,6 +42,8 @@ export default class Game {
       this.interact.displayInteractPrompt.bind(this.interact)
     );
     await this.scene.init();
+    if (this.firstInitialisation) {
+    }
     this.startGame();
   }
   startGame() {
@@ -57,20 +62,27 @@ export default class Game {
 
   pause(pause) {
     this.scene.player.resetPlayerStateDuringPause();
+    const rendererElement = this.scene.rendererElement;
+    rendererElement.style.filter = `blur(2px)`;
     this.scene.isTheGamePaused = pause;
+
     this.scene.instanceList.forEach((instance) => {
       instance.isTheGamePaused = pause;
     });
     if (!pause) {
+      rendererElement.style.filter = "none";
       this.scene.player.resumePlayerStateAfterPause();
     }
   }
 
   removeItemFromRoom(item) {
-    const currentRoom = this.rooms[this.currentRoomIndex];
+    const currentRoom = this.rooms[this.findRoomFromIndex()];
+    console.log(currentRoom);
+    console.log(item);
     for (let i = 0; i < currentRoom.itemSlots.length; i++) {
       if (currentRoom.itemSlots[i]) {
         if (currentRoom.itemSlots[i].index === item.index) {
+          console.log(currentRoom);
           currentRoom.itemSlots[i] = null;
           break;
         }

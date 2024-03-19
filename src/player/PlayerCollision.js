@@ -99,7 +99,9 @@ export default class PlayerCollision {
     for (const object of itemTriggers) {
       if (this.player.collider.intersectsBox(object.userData.collider)) {
         const item = object.userData.item;
-        this.player.toggleInteractPrompt(item);
+        if (item.pickedUp === false) {
+          this.player.toggleInteractPrompt(item);
+        }
       }
     }
     for (const object of itemBoxTrigers) {

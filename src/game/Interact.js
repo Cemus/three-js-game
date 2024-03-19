@@ -61,10 +61,10 @@ export default class Interact {
     if (event.code == "Space" && !this.hasInteracted) {
       this.isInteractPromptToggled = false;
       this.hasInteracted = true;
-      this.game.itemBox.display();
+      this.game.inventory.display(true);
     }
-    if (event.key.toUpperCase() === "E") {
-      this.game.itemBox.hide();
+    if (event.key.toUpperCase() === "E" && this.hasInteracted) {
+      this.game.inventory.hide();
       this.exitInteraction();
     }
   }
@@ -307,7 +307,15 @@ export default class Interact {
 
   async deleteItemFromRoom() {
     this.game.removeItemFromRoom(this.inspectedItem);
-
+    for (const key in this.game.scene.triggerList.items) {
+      if (Object.hasOwnProperty.call(this.game.scene.triggerList.items, key)) {
+        const element = this.game.scene.triggerList.items[key];
+        if (element.userData.item.index === this.inspectedItem.index) {
+          element.userData.item.pickedUp = true;
+        }
+      }
+    }
+    console.log(this.game.scene.triggerList.items);
     const nodeToDelete = await this.game.scene.findNodeByUUID(
       this.inspectedItem
     );

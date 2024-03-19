@@ -116,5 +116,6 @@ class Item {
     this.amount = amount;
     this.index = Item.itemCount++;
     this.uuid = null;
+    this.pickedUp = false;
   }
 }

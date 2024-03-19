@@ -3,8 +3,6 @@ import * as TWEEN from "@tweenjs/tween.js";
 import * as Stats from "stats.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
-import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
-import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import Player from "../player/Player";
 import Loader from "../entities/Loader";
 import Camera from "./Camera";
@@ -39,6 +37,7 @@ export default class Scene {
     this.shadowHelper = null;
 
     this.renderer = null;
+    this.rendererElement = null;
     this.composer = null;
 
     this.instanceList = [];
@@ -208,9 +207,11 @@ export default class Scene {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(this.renderer.domElement);
+    const canvasDomElement = this.renderer.domElement;
+    canvasDomElement.id = "renderer";
+    this.rendererElement = canvasDomElement;
+    document.body.appendChild(canvasDomElement);
 
     //Post processing
 
