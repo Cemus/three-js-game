@@ -3,8 +3,13 @@ export default class PlayerAnimation {
     this.player = player;
   }
 
-  async setupAnimations(walkingAnim, idleAnim, runningAnim) {
-    const animations = [...walkingAnim, ...idleAnim, ...runningAnim];
+  async setupAnimations(walkingAnim, idleAnim, runningAnim, aimingAnim) {
+    const animations = [
+      ...walkingAnim,
+      ...idleAnim,
+      ...runningAnim,
+      ...aimingAnim,
+    ];
     if (animations && animations.length > 0) {
       this.player.playerWalkingAnim = this.player.mixer.clipAction(
         animations[0]
@@ -12,6 +17,9 @@ export default class PlayerAnimation {
       this.player.playerIdleAnim = this.player.mixer.clipAction(animations[1]);
       this.player.playerRunningAnim = this.player.mixer.clipAction(
         animations[2]
+      );
+      this.player.playerAimingAnim = this.player.mixer.clipAction(
+        animations[3]
       );
       this.player.playerIdleAnim.play();
     }
@@ -33,9 +41,12 @@ export default class PlayerAnimation {
       this.player.moveForward ||
       this.player.moveBackward ||
       this.player.rotateLeft ||
-      this.player.rotateRight
+      this.player.rotateRight ||
+      this.player.isAiming
     ) {
-      if (this.player.moveForward && this.player.isRunning) {
+      if (this.player.isAiming) {
+        this.handleStateTransition("aiming");
+      } else if (this.player.moveForward && this.player.isRunning) {
         this.handleStateTransition("running");
       } else {
         this.handleStateTransition("walking");
@@ -43,6 +54,9 @@ export default class PlayerAnimation {
     } else {
       this.handleStateTransition("idle");
     }
+    console.log("aiming", this.player.isAiming);
+    console.log("walking", this.player.moveForward);
+    console.log("running", this.player.isRunning);
   }
 
   toIdlePose() {
@@ -67,8 +81,10 @@ export default class PlayerAnimation {
         case "running": {
           prevAnim = this.player.playerRunningAnim;
         }
+        case "aiming": {
+          prevAnim = this.player.playerAimingAnim;
+        }
       }
-
       switch (this.player.currentState) {
         case "idle":
           this.player.playerIdleAnim.time = this.player.animationTimeOnPause;
@@ -102,6 +118,17 @@ export default class PlayerAnimation {
             true
           );
           break;
+
+        case "aiming":
+          this.player.playerAimingAnim.time = this.player.animationTimeOnPause;
+          this.player.playerAimingAnim.play();
+          this.player.playerAimingAnim.setEffectiveTimeScale(1);
+          prevAnim.crossFadeTo(
+            this.player.playerAimingAnim,
+            transitionDuration,
+            true
+          );
+          break;
       }
       switch (this.player.currentState) {
         case "idle":
@@ -112,6 +139,9 @@ export default class PlayerAnimation {
           break;
         case "running":
           this.player.playerRunningAnim.enabled = true;
+          break;
+        case "aiming":
+          this.player.playerAimingAnim.enabled = true;
           break;
         default:
           this.player.playerIdleAnim.enabled = true;

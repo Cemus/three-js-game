@@ -25,10 +25,10 @@ export default class LabyrinthGenerator {
       new Item("smallHeal", 1),
       new Item("key", 1),
       new Item("key", 1),
-      new Item("smallHeal", 1),
-      new Item("smallHeal", 1),
-      new Item("smallHeal", 1),
-      new Item("smallHeal", 1),
+      new Item("nambu14", Math.floor(Math.random * (8 - 1 + 1) + 1)),
+      new Item("nambu14", Math.floor(Math.random * (8 - 1 + 1) + 1)),
+      new Item("nambu14", Math.floor(Math.random * (8 - 1 + 1) + 1)),
+      new Item("nambu14", Math.floor(Math.random * (8 - 1 + 1) + 1)),
     ];
   }
 

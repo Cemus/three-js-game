@@ -12,6 +12,8 @@ export default class Inventory {
     this.prevSelectedButton = 0;
     this.isInteractingWithItemBox = false;
     this.canSelectItem = false;
+
+    this.itemEquipped = null;
     this.domHandler = new InventoryDomHandler(this);
   }
   init() {
@@ -36,6 +38,7 @@ export default class Inventory {
     this.isInventoryToggled = false;
     this.canSelectItem = false;
     this.domHandler.removeInventory(false);
+    this.isInteractingWithItemBox = false;
   }
 
   resetSelection() {
@@ -144,6 +147,9 @@ export default class Inventory {
       case "Equip":
         this.equipItem(item);
         break;
+      case "Unequip":
+        this.equipItem(item);
+        break;
       case "Use":
         this.useItem(item);
         break;
@@ -164,7 +170,17 @@ export default class Inventory {
     this.game.itemBox.itemBoxActivation();
     console.log("test");
   }
-  equipItem(item) {}
+
+  equipItem(item) {
+    if (this.itemEquipped === null || this.itemEquipped.index !== item.index) {
+      this.itemEquipped = item;
+    } else if (this.itemEquipped.index === item.index) {
+      this.itemEquipped = null;
+    }
+
+    this.domHandler.removeInventory(false);
+    this.domHandler.createInventory(false);
+  }
 
   useItem(item) {
     switch (item.name) {
@@ -204,6 +220,9 @@ export default class Inventory {
         this.game.itemBox.slots[i] = item;
         break;
       }
+    }
+    if (this.itemEquipped.index === item.index) {
+      this.itemEquipped = null;
     }
     this.slots.splice(this.selectedSlot, 1);
 

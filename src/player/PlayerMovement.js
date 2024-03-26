@@ -7,69 +7,8 @@ export default class PlayerMovement {
     this.onKeyUp = this.onKeyUp.bind(this);
     this.isQuickTurning = false;
   }
-  onKeyDown(e) {
-    const isShiftPressed = e.shiftKey;
-    switch (e.key.toUpperCase()) {
-      case "Z":
-      case "W":
-        this.player.moveForward = true;
-        break;
-      case "S":
-        this.player.moveBackward = true;
-
-        break;
-      case "Q":
-      case "A":
-        this.player.rotateLeft = true;
-        break;
-      case "D":
-        this.player.rotateRight = true;
-        break;
-    }
-    if (this.player.moveForward && isShiftPressed) {
-      this.player.isRunning = true;
-    } else {
-      this.player.isRunning = false;
-    }
-    if (this.player.moveBackward && isShiftPressed) {
-      this.triggerQuickTurn();
-    }
-
-    this.player.animation.stateTransitionTrigger();
-  }
-
-  onKeyUp(e) {
-    const isShiftUp = e.shiftKey;
-    switch (e.key.toUpperCase()) {
-      case "Z":
-      case "W":
-        this.player.moveForward = false;
-        break;
-      case "S":
-        this.player.moveBackward = false;
-        if (isShiftUp) {
-          this.triggerQuickTurn();
-        }
-        break;
-      case "Q":
-      case "A":
-        this.player.rotateLeft = false;
-        break;
-      case "D":
-        this.player.rotateRight = false;
-        break;
-    }
-    if (this.player.moveForward && isShiftUp) {
-      this.player.isRunning = true;
-    } else {
-      this.player.isRunning = false;
-    }
-
-    this.player.animation.stateTransitionTrigger();
-  }
 
   update() {
-    const currentRotation = this.player.model.rotation.y;
     const rotationSpeed = 0.06;
     const normalSpeed = 4;
     const backwardSpeed = 2.5;
@@ -112,6 +51,77 @@ export default class PlayerMovement {
     }
     this.player.model.rotateY(rotationDirection);
   }
+
+  onKeyDown(e) {
+    const isShiftDown = e.shiftKey;
+    const isControlDown = e.ctrlKey;
+    switch (e.key.toUpperCase()) {
+      case "Z":
+      case "W":
+        this.player.moveForward = true;
+        break;
+      case "S":
+        this.player.moveBackward = true;
+        break;
+      case "Q":
+      case "A":
+        this.player.rotateLeft = true;
+        break;
+      case "D":
+        this.player.rotateRight = true;
+        break;
+    }
+    if (this.player.moveForward && isShiftDown) {
+      this.player.isRunning = true;
+    } else {
+      this.player.isRunning = false;
+    }
+    if (this.player.moveBackward && isShiftDown) {
+      this.triggerQuickTurn();
+    }
+    if (isControlDown) {
+      this.player.isRunning = false;
+      this.player.moveForward = false;
+      this.player.isAiming = true;
+    }
+
+    this.player.animation.stateTransitionTrigger();
+  }
+
+  onKeyUp(e) {
+    const isShiftDown = e.shiftKey;
+    const isControlDown = e.ctrlKey;
+
+    switch (e.key.toUpperCase()) {
+      case "Z":
+      case "W":
+        this.player.moveForward = false;
+        break;
+      case "S":
+        this.player.moveBackward = false;
+        if (isShiftDown) {
+          this.triggerQuickTurn();
+        }
+        break;
+      case "Q":
+      case "A":
+        this.player.rotateLeft = false;
+        break;
+      case "D":
+        this.player.rotateRight = false;
+        break;
+    }
+    if (this.player.moveForward && isShiftDown) {
+      this.player.isRunning = true;
+    } else if (!isShiftDown) {
+      this.player.isRunning = false;
+    }
+    if (!isControlDown) {
+      this.player.isAiming = false;
+    }
+    this.player.animation.stateTransitionTrigger();
+  }
+
   triggerQuickTurn() {
     if (!this.isQuickTurning) {
       this.isQuickTurning = true;

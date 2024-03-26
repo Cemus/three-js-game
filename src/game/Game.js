@@ -27,6 +27,8 @@ export default class Game {
   }
 
   async init() {
+    document.addEventListener("keydown", this.preventBrowserShortcuts);
+
     if (this.firstInitialisation) {
       this.rooms = await this.labyrinth.init();
       const currentRoomDoorCount =
@@ -41,10 +43,9 @@ export default class Game {
       this.setPlayerSpawningZone.bind(this),
       this.interact.displayInteractPrompt.bind(this.interact)
     );
-    await this.scene.init();
-    if (this.firstInitialisation) {
-    }
-    this.startGame();
+    await this.scene.init().then(() => {
+      this.startGame();
+    });
   }
   startGame() {
     this.interact.hasInteracted = false;
@@ -87,6 +88,17 @@ export default class Game {
           break;
         }
       }
+    }
+  }
+  preventBrowserShortcuts(event) {
+    if (
+      (event.ctrlKey || event.metaKey) &&
+      (event.key === "d" ||
+        event.key === "w" ||
+        event.key === "z" ||
+        event.key === " ")
+    ) {
+      event.preventDefault();
     }
   }
 }

@@ -17,6 +17,8 @@ export default class Interact {
     this.choiceOptions = [];
     this.selectedOption = 0;
 
+    this.isInspectingObject = false;
+
     this.changeLevelListeners = [];
     this.inspectListeners = [];
     this.pickUpItemListeners = [];
@@ -48,7 +50,10 @@ export default class Interact {
     if (typeof interactiveObjectName === "object") {
       this.handleItems(interactiveObjectName);
     } else {
-      if (interactiveObjectName.includes("doorTrigger")) {
+      if (
+        interactiveObjectName.includes("doorTrigger") ||
+        interactiveObjectName.includes("mainDoor") //test
+      ) {
         this.handleDoors(interactiveObjectName);
       }
       if (interactiveObjectName.includes("itemBox")) {
@@ -77,6 +82,9 @@ export default class Interact {
     }
   }
   handleDoors(interactiveObjectName) {
+    //test
+
+    //^test
     const objectFromName = interactiveObjectName.split("_")[1];
     const findCurrentRoomIndex = this.game.rooms.findIndex(
       (room) => room.roomIndex === this.game.currentRoomIndex
@@ -149,6 +157,7 @@ export default class Interact {
       this.showInteractPrompt();
       this.game.pause(true);
       this.hasInteracted = true;
+      this.isInspectingObject = true;
       switch (this.inspectedObject) {
         case "jammed":
           this.interactMessage.innerHTML = "It's jammed";
@@ -175,6 +184,9 @@ export default class Interact {
             break;
           case "key":
             this.interactMessage.innerHTML = `Take the <span class="green-text">common key</span> ?`;
+            break;
+          case "nambu14":
+            this.interactMessage.innerHTML = `Take the <span class="green-text">handgun</span> ?`;
             break;
           default:
         }
@@ -256,6 +268,7 @@ export default class Interact {
     this.hideInteractPrompt();
     this.game.inventory.hide();
     this.selectedOption = 0;
+    this.isInspectingObject = false;
   }
 
   clearListeners() {
@@ -283,14 +296,16 @@ export default class Interact {
 
   hidePromptOnKeyPress() {
     document.removeEventListener("keyup", this.hidePromptOnKeyPress);
+
     this.hideInteractPrompt();
+
     if (this.isInteractPromptToggled === false && !this.hasInteracted) {
       this.clearListeners();
     }
   }
 
   hideInteractPrompt() {
-    if (!this.isChoicePromptToggled) {
+    if (!this.isChoicePromptToggled && !this.isInspectingObject) {
       this.interactMessageContainer.style.display = "none";
       this.isInteractPromptToggled = false;
       this.choiceContainer.innerHTML = "";
@@ -315,7 +330,6 @@ export default class Interact {
         }
       }
     }
-    console.log(this.game.scene.triggerList.items);
     const nodeToDelete = await this.game.scene.findNodeByUUID(
       this.inspectedItem
     );

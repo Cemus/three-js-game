@@ -111,6 +111,10 @@ body {
   border-radius: 5px;
 }
 
+.equipped-slot {
+  border: 2px solid orange;
+}
+
 .slot-button-container {
   display: flex;
   flex-direction: column;

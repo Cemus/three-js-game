@@ -22,10 +22,16 @@ export default class InventoryDomHandler {
     for (let i = 0; i < maxCapacity; i++) {
       const slotContainerElement = this.createSlotContainer();
       const slotElement = this.createSlot();
+
       const itemNameElement = this.createItemNameElement(this.parent.slots[i]);
 
       slotElement.appendChild(itemNameElement);
       slotContainerElement.appendChild(slotElement);
+      if (!isItemBox && this.parent.slots[i] && this.parent.itemEquipped) {
+        if (this.parent.slots[i].index === this.parent.itemEquipped.index) {
+          this.createEquippedSlot(slotElement);
+        }
+      }
       parentElement.appendChild(slotContainerElement);
     }
     this.updateSelectedSlot(isItemBox);
@@ -91,7 +97,12 @@ export default class InventoryDomHandler {
   createSlot() {
     const slotElement = document.createElement("div");
     slotElement.classList.add("slot");
+
     return slotElement;
+  }
+
+  createEquippedSlot(slotElement) {
+    slotElement.classList.add("equipped-slot");
   }
 
   createItemNameElement(item) {
@@ -118,7 +129,13 @@ export default class InventoryDomHandler {
         }
         slotMenuContainerElement.appendChild(storeOrTakeButton);
       } else {
-        const equipButton = this.createInventoryMenuButton("equip");
+        let equipButton;
+
+        this.parent.itemEquipped &&
+        item.index === this.parent.itemEquipped.index
+          ? (equipButton = this.createInventoryMenuButton("unequip"))
+          : (equipButton = this.createInventoryMenuButton("equip"));
+
         const useButton = this.createInventoryMenuButton("use");
         const examineButton = this.createInventoryMenuButton("examine");
         switch (item.name) {
@@ -132,7 +149,7 @@ export default class InventoryDomHandler {
             slotMenuContainerElement.appendChild(examineButton);
             break;
 
-          case "handgun":
+          case "nambu14":
             slotMenuContainerElement.appendChild(equipButton);
             slotMenuContainerElement.appendChild(examineButton);
             break;
@@ -149,6 +166,9 @@ export default class InventoryDomHandler {
     switch (type) {
       case "equip":
         buttonTextElement.innerHTML = "Equip";
+        break;
+      case "unequip":
+        buttonTextElement.innerHTML = "Unequip";
         break;
       case "use":
         buttonTextElement.innerHTML = "Use";

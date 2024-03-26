@@ -44,6 +44,8 @@ export default class Scene {
     this.player = null;
     this.level = null;
 
+    this.playerColliderHelper = null;
+
     this.solidInstanceList = [];
     this.triggerList = { cameras: [], doors: [], items: [], itemBox: [] };
     this.playerSpawningZoneList = [];
@@ -80,10 +82,18 @@ export default class Scene {
       this.toggleInteractPrompt
     );
     this.instanceList.push(this.player);
+
     await this.player.init(this.loader).then(() => {
       this.addToScene(this.player.model);
     });
-    console.log(this.player);
+    console.log(this.player.collider);
+    /*     this.playerColliderHelper = new THREE.Box3Helper(
+      this.player.collider,
+      0xffff00
+    ); 
+    console.log(this.playerColliderHelper);
+    this.addToScene(this.playerColliderHelper);*/
+
     //Render
     this.camera.init();
     this.light.init();
@@ -99,7 +109,7 @@ export default class Scene {
         this.player.animation.update(this.clock);
         if (!this.isTheGamePaused) {
           this.player.update(this.solidInstanceList, this.triggerList);
-
+          /*           this.playerColliderHelper.box.setFromObject(this.player.model); */
           TWEEN.update();
           this.camera.handleCameraModes();
           this.lastFrameTime =
@@ -112,7 +122,7 @@ export default class Scene {
     }
   }
 
-  addToScene(object) {
+  async addToScene(object) {
     this.scene.add(object);
   }
 
@@ -150,6 +160,11 @@ export default class Scene {
         node.userData.collider = new THREE.Box3().setFromObject(node);
         tempDoorTriggerList.push({ node, number: triggerNumber });
       }
+      //Test purpose
+      if (node.name.includes("mainDoor")) {
+        node.userData.collider = new THREE.Box3().setFromObject(node);
+        tempDoorTriggerList.push({ node, number: -1 });
+      }
       //Item box
       if (node.name.includes("itemBox")) {
         node.userData.collider = new THREE.Box3().setFromObject(node);
@@ -167,10 +182,9 @@ export default class Scene {
           const item = await this.loader.loadModel(
             `../../assets/rooms/${currentRoomSlotItem.name}.gltf`
           );
-          item.traverse((itemsNode) => {
+          item.traverse(async (itemsNode) => {
             if (itemsNode.name.includes("item")) {
               currentRoomSlotItem.uuid = itemsNode.uuid;
-              this.scene.add(itemsNode);
               const spawnPosition = node.position.clone();
               const spawnRotation = node.rotation.clone();
               itemsNode.userData.collider = itemsCollider;
@@ -179,6 +193,7 @@ export default class Scene {
               itemsNode.rotation.copy(spawnRotation);
               itemsNode.position.copy(spawnPosition);
               this.triggerList.items.push(itemsNode);
+              await this.addToScene(itemsNode);
             }
           });
         }

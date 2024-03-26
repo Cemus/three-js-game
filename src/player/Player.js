@@ -22,6 +22,7 @@ export default class Player {
     this.playerRunningAnim = null;
     this.animationTimeOnPause = 0;
 
+    this.isAiming = false;
     this.isRunning = false;
     this.moveForward = false;
     this.moveBackward = false;
@@ -56,6 +57,7 @@ export default class Player {
 
       this.mixer = new THREE.AnimationMixer(this.model);
 
+      //Base
       const walkingAnim = await loader.loadAnimation(
         `${this.assetsFolder}playerWalkingAnim.gltf`
       );
@@ -66,7 +68,17 @@ export default class Player {
         `${this.assetsFolder}playerRunningAnim.gltf`
       );
 
-      await this.animation.setupAnimations(walkingAnim, idleAnim, runningAnim);
+      //Gun
+      const aimingAnim = await loader.loadAnimation(
+        `${this.assetsFolder}playerAimingAnim.gltf`
+      );
+
+      await this.animation.setupAnimations(
+        walkingAnim,
+        idleAnim,
+        runningAnim,
+        aimingAnim
+      );
       this.model.userData.mixer = this.mixer;
     } catch (error) {
       console.error("Erreur de chargement du modèle:", error);
@@ -95,19 +107,20 @@ export default class Player {
     this.model.position.copy(spawnPosition);
 
     this.spawnRotation = this.model.rotation.y;
-    console.log(this.spawnRotation);
     this.model.scale.set(0.2, 0.2, 0.2);
     console.log(this.model);
+
     this.collider = this.updateCollider();
   }
 
   updateCollider() {
-    return new THREE.Box3().setFromObject(this.model);
+    const box = new THREE.Box3().setFromObject(this.model);
+    box.max.y += 3; //Hauteur modifiée
+    return box;
   }
 
   update(solidInstancesList, triggerList) {
     this.collider = this.updateCollider();
-
     if (this.collision.checkWallCollisions(solidInstancesList)) {
       this.collision.handleWallCollisions(solidInstancesList);
     }
@@ -123,6 +136,7 @@ export default class Player {
     this.moveForward = false;
     this.rotateLeft = false;
     this.rotateRight = false;
+    this.isAiming = false;
     this.isRunning = false;
     this.animation.toIdlePose();
   }
