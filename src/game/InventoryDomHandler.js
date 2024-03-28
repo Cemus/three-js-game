@@ -72,7 +72,6 @@ export default class InventoryDomHandler {
     const parentElement = isItemBox
       ? this.itemBoxElement
       : this.inventoryElement;
-    console.log(isItemBox);
     const selectedSlot = parentElement.children[this.parent.selectedSlot];
 
     if (selectedSlot.children[1]) {
@@ -82,7 +81,6 @@ export default class InventoryDomHandler {
         selectedSlot.children[1].children[this.parent.selectedButton];
 
       if (this.parent.canSelectItem) {
-        console.log("test");
         parentPrevButtonSelected.classList.remove("slot-button-selected");
         parentSelectedButton.classList.add("slot-button-selected");
       }
@@ -204,7 +202,6 @@ export default class InventoryDomHandler {
       ? this.itemBoxElement
       : this.inventoryElement;
     const selectedSlot = parentElement.children[this.parent.selectedSlot];
-    console.log(selectedSlot);
     if (selectedSlot.children[1]) {
       return selectedSlot.children[1].children.length;
     }

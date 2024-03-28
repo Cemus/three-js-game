@@ -21,9 +21,7 @@ export default class Game {
   }
 
   findRoomFromIndex() {
-    return this.rooms.findIndex(
-      (room) => room.roomIndex === this.currentRoomIndex
-    );
+    return this.rooms.findIndex((room) => room.index === this.currentRoomIndex);
   }
 
   async init() {
@@ -78,12 +76,9 @@ export default class Game {
 
   removeItemFromRoom(item) {
     const currentRoom = this.rooms[this.findRoomFromIndex()];
-    console.log(currentRoom);
-    console.log(item);
     for (let i = 0; i < currentRoom.itemSlots.length; i++) {
       if (currentRoom.itemSlots[i]) {
         if (currentRoom.itemSlots[i].index === item.index) {
-          console.log(currentRoom);
           currentRoom.itemSlots[i] = null;
           break;
         }
@@ -96,7 +91,8 @@ export default class Game {
       (event.key === "d" ||
         event.key === "w" ||
         event.key === "z" ||
-        event.key === " ")
+        event.key === " " ||
+        event.key === "s")
     ) {
       event.preventDefault();
     }

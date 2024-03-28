@@ -79,34 +79,37 @@ export default class PlayerCollision {
   }
 
   handleTriggerCollisions(triggerList) {
-    const cameraTriggers = triggerList.cameras;
-    const doorTriggers = triggerList.doors;
-    const itemTriggers = triggerList.items;
-    const itemBoxTrigers = triggerList.itemBox;
-    for (const object of cameraTriggers) {
-      if (this.player.collider.intersectsBox(object.userData.collider)) {
-        const objectName = object.name;
-        const cameraNumber = parseInt(objectName.match(/\d+/)[0]);
-        this.player.cameraTriggerActivation(parseInt(cameraNumber));
-      }
-    }
-    for (const object of doorTriggers) {
-      if (this.player.collider.intersectsBox(object.userData.collider)) {
-        const objectName = object.name;
-        this.player.toggleInteractPrompt(objectName);
-      }
-    }
-    for (const object of itemTriggers) {
-      if (this.player.collider.intersectsBox(object.userData.collider)) {
-        const item = object.userData.item;
-        if (item.pickedUp === false) {
-          this.player.toggleInteractPrompt(item);
+    if (!this.player.isAiming) {
+      const cameraTriggers = triggerList.cameras;
+      const doorTriggers = triggerList.doors;
+      const itemTriggers = triggerList.items;
+      const itemBoxTrigers = triggerList.itemBox;
+
+      for (const object of cameraTriggers) {
+        if (this.player.collider.intersectsBox(object.userData.collider)) {
+          const objectName = object.name;
+          const cameraNumber = parseInt(objectName.match(/\d+/)[0]);
+          this.player.cameraTriggerActivation(parseInt(cameraNumber));
         }
       }
-    }
-    for (const object of itemBoxTrigers) {
-      if (this.player.collider.intersectsBox(object.userData.collider)) {
-        this.player.toggleInteractPrompt("itemBox");
+      for (const object of doorTriggers) {
+        if (this.player.collider.intersectsBox(object.userData.collider)) {
+          const objectName = object.name;
+          this.player.toggleInteractPrompt(objectName);
+        }
+      }
+      for (const object of itemTriggers) {
+        if (this.player.collider.intersectsBox(object.userData.collider)) {
+          const item = object.userData.item;
+          if (item.pickedUp === false) {
+            this.player.toggleInteractPrompt(item);
+          }
+        }
+      }
+      for (const object of itemBoxTrigers) {
+        if (this.player.collider.intersectsBox(object.userData.collider)) {
+          this.player.toggleInteractPrompt("itemBox");
+        }
       }
     }
   }

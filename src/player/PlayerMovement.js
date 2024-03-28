@@ -15,41 +15,45 @@ export default class PlayerMovement {
     const runningSpeed = 4.5;
     const multiplicateur = 0.01;
 
-    if (this.player.moveForward) {
-      const forwardDelta = new THREE.Vector3(0, 0, 1).applyQuaternion(
-        this.player.model.quaternion
-      );
-      this.player.model.position.add(
-        forwardDelta.multiplyScalar(normalSpeed * multiplicateur)
-      );
+    if (!this.player.isAiming && !this.player.isShooting) {
+      if (this.player.moveForward) {
+        const forwardDelta = new THREE.Vector3(0, 0, 1).applyQuaternion(
+          this.player.model.quaternion
+        );
+        this.player.model.position.add(
+          forwardDelta.multiplyScalar(normalSpeed * multiplicateur)
+        );
+      }
+
+      if (this.player.moveBackward) {
+        const backwardDelta = new THREE.Vector3(0, 0, -1).applyQuaternion(
+          this.player.model.quaternion
+        );
+        this.player.model.position.add(
+          backwardDelta.multiplyScalar(backwardSpeed * multiplicateur)
+        );
+      }
+
+      if (this.player.isRunning && this.player.moveForward) {
+        const forwardDelta = new THREE.Vector3(0, 0, 1).applyQuaternion(
+          this.player.model.quaternion
+        );
+        this.player.model.position.add(
+          forwardDelta.multiplyScalar(runningSpeed * multiplicateur)
+        );
+      }
     }
 
-    if (this.player.moveBackward) {
-      const backwardDelta = new THREE.Vector3(0, 0, -1).applyQuaternion(
-        this.player.model.quaternion
-      );
-      this.player.model.position.add(
-        backwardDelta.multiplyScalar(backwardSpeed * multiplicateur)
-      );
+    if (!this.player.isShooting) {
+      let rotationDirection = 0;
+      if (this.player.rotateLeft) {
+        rotationDirection += rotationSpeed;
+      }
+      if (this.player.rotateRight) {
+        rotationDirection -= rotationSpeed;
+      }
+      this.player.model.rotateY(rotationDirection);
     }
-
-    if (this.player.isRunning && this.player.moveForward) {
-      const forwardDelta = new THREE.Vector3(0, 0, 1).applyQuaternion(
-        this.player.model.quaternion
-      );
-      this.player.model.position.add(
-        forwardDelta.multiplyScalar(runningSpeed * multiplicateur)
-      );
-    }
-
-    let rotationDirection = 0;
-    if (this.player.rotateLeft) {
-      rotationDirection += rotationSpeed;
-    }
-    if (this.player.rotateRight) {
-      rotationDirection -= rotationSpeed;
-    }
-    this.player.model.rotateY(rotationDirection);
   }
 
   onKeyDown(e) {
@@ -71,6 +75,7 @@ export default class PlayerMovement {
         this.player.rotateRight = true;
         break;
     }
+
     if (this.player.moveForward && isShiftDown) {
       this.player.isRunning = true;
     } else {
@@ -80,9 +85,7 @@ export default class PlayerMovement {
       this.triggerQuickTurn();
     }
     if (isControlDown) {
-      this.player.isRunning = false;
-      this.player.moveForward = false;
-      this.player.isAiming = true;
+      this.player.isAiming = this.handleAiming(true);
     }
 
     this.player.animation.stateTransitionTrigger();
@@ -110,6 +113,12 @@ export default class PlayerMovement {
       case "D":
         this.player.rotateRight = false;
         break;
+      case " ":
+        if (this.player.isAiming && !this.player.isShooting) {
+          this.player.isShooting = true;
+        }
+
+        break;
     }
     if (this.player.moveForward && isShiftDown) {
       this.player.isRunning = true;
@@ -117,7 +126,9 @@ export default class PlayerMovement {
       this.player.isRunning = false;
     }
     if (!isControlDown) {
-      this.player.isAiming = false;
+      if (!this.player.isShooting) {
+        this.player.isAiming = this.handleAiming(false);
+      }
     }
     this.player.animation.stateTransitionTrigger();
   }
@@ -132,5 +143,10 @@ export default class PlayerMovement {
         this.isQuickTurning = false;
       }, 1000);
     }
+  }
+
+  handleAiming(isAiming) {
+    this.player.itemEquipped ? isAiming : (isAiming = false);
+    return isAiming;
   }
 }

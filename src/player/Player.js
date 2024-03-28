@@ -14,7 +14,7 @@ export default class Player {
     this.toggleInteractPrompt = toggleInteractPrompt;
 
     this.assetsFolder = "../../assets/models/player/";
-    this.assetsModelName = "lastPsych.gltf";
+    this.assetsModelName = "lastPsych";
     this.mixer = null;
     this.model = null;
     this.playerWalkingAnim = null;
@@ -32,7 +32,7 @@ export default class Player {
     this.currentState = "idle";
     this.isTheGamePaused = false;
 
-    this.lastBackwardKeyPressTime = 0;
+    this.itemEquipped = null;
 
     this.spawnRotation = null;
 
@@ -51,33 +51,40 @@ export default class Player {
 
   async setupAssets(loader) {
     try {
-      this.model = await loader.loadModel(
-        `${this.assetsFolder}${this.assetsModelName}`
+      this.model = await loader.loadCharacter(
+        this.assetsFolder,
+        this.assetsModelName
       );
 
       this.mixer = new THREE.AnimationMixer(this.model);
 
       //Base
       const walkingAnim = await loader.loadAnimation(
-        `${this.assetsFolder}playerWalkingAnim.gltf`
+        "player",
+        "playerWalkingAnim"
       );
-      const idleAnim = await loader.loadAnimation(
-        `${this.assetsFolder}playerIdleAnim.gltf`
-      );
+      const idleAnim = await loader.loadAnimation("player", "playerIdleAnim");
       const runningAnim = await loader.loadAnimation(
-        `${this.assetsFolder}playerRunningAnim.gltf`
+        "player",
+        "playerRunningAnim"
       );
 
       //Gun
       const aimingAnim = await loader.loadAnimation(
-        `${this.assetsFolder}playerAimingAnim.gltf`
+        "player",
+        "playerAimingAnim"
+      );
+      const shootingAnim = await loader.loadAnimation(
+        "player",
+        "playerShootingAnim"
       );
 
       await this.animation.setupAnimations(
         walkingAnim,
         idleAnim,
         runningAnim,
-        aimingAnim
+        aimingAnim,
+        shootingAnim
       );
       this.model.userData.mixer = this.mixer;
     } catch (error) {
@@ -108,7 +115,6 @@ export default class Player {
 
     this.spawnRotation = this.model.rotation.y;
     this.model.scale.set(0.2, 0.2, 0.2);
-    console.log(this.model);
 
     this.collider = this.updateCollider();
   }
@@ -143,6 +149,18 @@ export default class Player {
 
   resumePlayerStateAfterPause() {
     this.setupListeners();
+  }
+
+  handleEquipment(itemEquipped) {
+    if (itemEquipped) {
+      this.itemEquipped = itemEquipped;
+      switch (itemEquipped.name) {
+        case "nambu14":
+          break;
+      }
+    } else {
+      this.itemEquipped = null;
+    }
   }
 
   destroy() {

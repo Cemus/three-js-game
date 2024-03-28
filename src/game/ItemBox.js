@@ -94,7 +94,6 @@ export default class ItemBox {
       case "S":
         if (this.canSelectItem && this.slots[this.selectedSlot]) {
           const slotButtonLength = this.domHandler.getSlotButtonLength(true);
-          console.log(slotButtonLength);
           if (this.selectedButton !== slotButtonLength - 1) {
             this.prevSelectedButton = this.selectedButton;
             this.selectedButton++;
@@ -123,7 +122,6 @@ export default class ItemBox {
       //Validation
       case " ":
         if (this.canSelectItem) {
-          console.log("exchange itembox");
           this.exchangeItem();
         }
         break;

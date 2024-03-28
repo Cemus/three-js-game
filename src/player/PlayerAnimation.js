@@ -1,14 +1,23 @@
+import * as THREE from "three";
+
 export default class PlayerAnimation {
   constructor(player) {
     this.player = player;
   }
 
-  async setupAnimations(walkingAnim, idleAnim, runningAnim, aimingAnim) {
+  async setupAnimations(
+    walkingAnim,
+    idleAnim,
+    runningAnim,
+    aimingAnim,
+    shootingAnim
+  ) {
     const animations = [
       ...walkingAnim,
       ...idleAnim,
       ...runningAnim,
       ...aimingAnim,
+      ...shootingAnim,
     ];
     if (animations && animations.length > 0) {
       this.player.playerWalkingAnim = this.player.mixer.clipAction(
@@ -21,6 +30,19 @@ export default class PlayerAnimation {
       this.player.playerAimingAnim = this.player.mixer.clipAction(
         animations[3]
       );
+      this.player.playerShootingAnim = this.player.mixer.clipAction(
+        animations[4]
+      );
+
+      //Shooting specifics
+      this.player.playerShootingAnim.setLoop(THREE.LoopOnce);
+      this.player.playerShootingAnim.clampWhenFinished = true;
+      this.player.playerShootingAnim._mixer.addEventListener("finished", () => {
+        this.player.playerShootingAnim.reset();
+        this.handleStateTransition("aiming");
+        this.player.isShooting = false;
+        this.player.isAiming = false;
+      });
       this.player.playerIdleAnim.play();
     }
   }
@@ -45,7 +67,9 @@ export default class PlayerAnimation {
       this.player.isAiming
     ) {
       if (this.player.isAiming) {
-        this.handleStateTransition("aiming");
+        this.player.isShooting
+          ? this.handleStateTransition("shooting")
+          : this.handleStateTransition("aiming");
       } else if (this.player.moveForward && this.player.isRunning) {
         this.handleStateTransition("running");
       } else {
@@ -54,9 +78,6 @@ export default class PlayerAnimation {
     } else {
       this.handleStateTransition("idle");
     }
-    console.log("aiming", this.player.isAiming);
-    console.log("walking", this.player.moveForward);
-    console.log("running", this.player.isRunning);
   }
 
   toIdlePose() {
@@ -65,7 +86,6 @@ export default class PlayerAnimation {
 
   handleStateTransition(newState) {
     const transitionDuration = 0.25;
-
     if (this.player.currentState !== newState) {
       const prevState = this.player.currentState;
       this.player.currentState = newState;
@@ -78,12 +98,15 @@ export default class PlayerAnimation {
         case "walking":
           prevAnim = this.player.playerWalkingAnim;
           break;
-        case "running": {
+        case "running":
           prevAnim = this.player.playerRunningAnim;
-        }
-        case "aiming": {
+          break;
+        case "aiming":
           prevAnim = this.player.playerAimingAnim;
-        }
+          break;
+        case "shooting":
+          prevAnim = this.player.playerShootingAnim;
+          break;
       }
       switch (this.player.currentState) {
         case "idle":
@@ -129,6 +152,17 @@ export default class PlayerAnimation {
             true
           );
           break;
+
+        case "shooting":
+          this.player.playerShootingAnim.time = 0;
+          this.player.playerShootingAnim.play();
+          this.player.playerShootingAnim.setEffectiveTimeScale(1);
+          prevAnim.crossFadeTo(
+            this.player.playerShootingAnim,
+            transitionDuration,
+            true
+          );
+          break;
       }
       switch (this.player.currentState) {
         case "idle":
@@ -142,6 +176,9 @@ export default class PlayerAnimation {
           break;
         case "aiming":
           this.player.playerAimingAnim.enabled = true;
+          break;
+        case "shooting":
+          this.player.playerShootingAnim.enabled = true;
           break;
         default:
           this.player.playerIdleAnim.enabled = true;

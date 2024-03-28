@@ -4,7 +4,7 @@ import * as Stats from "stats.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import Player from "../player/Player";
-import Loader from "../entities/Loader";
+import Loader from "../loader/Loader";
 import Camera from "./Camera";
 import Light from "./Light";
 
@@ -71,7 +71,7 @@ export default class Scene {
 
     //Level
 
-    this.level = await this.loader.loadModel(this.currentRoom.roomURL);
+    this.level = await this.loader.loadRoom(this.currentRoom.name);
     await this.setupInterractiveObjectsProperties();
     this.addToScene(this.level);
 
@@ -86,7 +86,6 @@ export default class Scene {
     await this.player.init(this.loader).then(() => {
       this.addToScene(this.player.model);
     });
-    console.log(this.player.collider);
     /*     this.playerColliderHelper = new THREE.Box3Helper(
       this.player.collider,
       0xffff00
@@ -161,7 +160,7 @@ export default class Scene {
         tempDoorTriggerList.push({ node, number: triggerNumber });
       }
       //Test purpose
-      if (node.name.includes("mainDoor")) {
+      if (node.name.includes("mainDkoor")) {
         node.userData.collider = new THREE.Box3().setFromObject(node);
         tempDoorTriggerList.push({ node, number: -1 });
       }
@@ -179,9 +178,7 @@ export default class Scene {
         this.addToScene(helper);
         const currentRoomSlotItem = this.currentRoom.itemSlots[slotNumber];
         if (currentRoomSlotItem !== null) {
-          const item = await this.loader.loadModel(
-            `../../assets/rooms/${currentRoomSlotItem.name}.gltf`
-          );
+          const item = await this.loader.loadItem(currentRoomSlotItem.name);
           item.traverse(async (itemsNode) => {
             if (itemsNode.name.includes("item")) {
               currentRoomSlotItem.uuid = itemsNode.uuid;

@@ -2,21 +2,21 @@ export default class LabyrinthGenerator {
   constructor() {
     this.labyrinth = [
       {
-        roomIndex: 0,
+        name: "entranceRoom",
+        index: 0,
         doorCount: 3,
-        roomURL: `../../assets/rooms/entranceRoom.gltf`,
         itemSlots: [...Array(5)].fill(null),
       },
       {
-        roomIndex: 1,
+        name: "laundryRoom",
+        index: 1,
         doorCount: 3,
-        roomURL: `../../assets/rooms/laundryRoom.gltf`,
         itemSlots: [...Array(4).fill(null)],
       },
       {
-        roomIndex: 2,
+        name: "garageRoom",
+        index: 2,
         doorCount: 1,
-        roomURL: `../../assets/rooms/garageRoom.gltf`,
         itemSlots: [...Array(6).fill(null)],
       },
     ];
@@ -25,6 +25,10 @@ export default class LabyrinthGenerator {
       new Item("smallHeal", 1),
       new Item("key", 1),
       new Item("key", 1),
+      new Item("nambu14", Math.floor(Math.random * (8 - 1 + 1) + 1)),
+      new Item("nambu14", Math.floor(Math.random * (8 - 1 + 1) + 1)),
+      new Item("nambu14", Math.floor(Math.random * (8 - 1 + 1) + 1)),
+      new Item("nambu14", Math.floor(Math.random * (8 - 1 + 1) + 1)),
       new Item("nambu14", Math.floor(Math.random * (8 - 1 + 1) + 1)),
       new Item("nambu14", Math.floor(Math.random * (8 - 1 + 1) + 1)),
       new Item("nambu14", Math.floor(Math.random * (8 - 1 + 1) + 1)),
@@ -44,9 +48,9 @@ export default class LabyrinthGenerator {
     const rooms = this.labyrinth.map(
       (roomData) =>
         new Room(
-          roomData.roomIndex,
+          roomData.name,
+          roomData.index,
           roomData.doorCount,
-          roomData.roomURL,
           roomData.itemSlots
         )
     );
@@ -75,14 +79,14 @@ export default class LabyrinthGenerator {
 
     for (const room of rooms) {
       for (let i = 0; i < room.itemSlots.length; i++) {
-        allItemSlots.push({ roomIndex: room.roomIndex, slotIndex: i });
+        allItemSlots.push({ index: room.index, slotIndex: i });
       }
     }
 
     const shuffledItemSlots = this.shuffle(allItemSlots);
 
-    for (const { roomIndex, slotIndex } of shuffledItemSlots) {
-      const room = rooms[roomIndex];
+    for (const { index, slotIndex } of shuffledItemSlots) {
+      const room = rooms[index];
       if (itemsDistributed < itemList.length) {
         room.itemSlots[slotIndex] = itemList[itemsDistributed];
         itemsDistributed++;
@@ -93,17 +97,17 @@ export default class LabyrinthGenerator {
   }
 }
 class Room {
-  constructor(roomIndex, doorCount, roomURL, itemSlots) {
-    this.roomIndex = roomIndex;
+  constructor(name, index, doorCount, itemSlots) {
+    this.name = name;
+    this.index = index;
     this.doorCount = doorCount;
-    this.roomURL = roomURL;
     this.itemSlots = itemSlots;
     this.connectedDoors = {};
   }
 
   connectDoor(currentDoor, nextRoom, nextDoor) {
     this.connectedDoors[currentDoor] = {
-      nextRoomIndex: nextRoom.roomIndex,
+      nextRoomIndex: nextRoom.index,
       nextDoor: nextDoor,
     };
   }

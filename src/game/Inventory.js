@@ -39,6 +39,9 @@ export default class Inventory {
     this.canSelectItem = false;
     this.domHandler.removeInventory(false);
     this.isInteractingWithItemBox = false;
+
+    //weapon to the player
+    this.game.scene.player.handleEquipment(this.itemEquipped);
   }
 
   resetSelection() {
@@ -101,7 +104,6 @@ export default class Inventory {
       case "S":
         if (this.canSelectItem && this.slots[this.selectedSlot]) {
           const slotButtonLength = this.domHandler.getSlotButtonLength(false);
-          console.log(slotButtonLength);
           if (this.selectedButton !== slotButtonLength - 1) {
             this.prevSelectedButton = this.selectedButton;
             this.selectedButton++;
@@ -160,7 +162,6 @@ export default class Inventory {
         this.storeItem(item);
         break;
       case "Exchange":
-        console.log("exchange clicked");
         this.exchangeItem();
         break;
     }
@@ -168,7 +169,6 @@ export default class Inventory {
   exchangeItem() {
     this.canSelectItem = false;
     this.game.itemBox.itemBoxActivation();
-    console.log("test");
   }
 
   equipItem(item) {

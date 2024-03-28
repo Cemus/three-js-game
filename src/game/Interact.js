@@ -82,12 +82,9 @@ export default class Interact {
     }
   }
   handleDoors(interactiveObjectName) {
-    //test
-
-    //^test
     const objectFromName = interactiveObjectName.split("_")[1];
     const findCurrentRoomIndex = this.game.rooms.findIndex(
-      (room) => room.roomIndex === this.game.currentRoomIndex
+      (room) => room.index === this.game.currentRoomIndex
     );
     const currentRoom = this.game.rooms[findCurrentRoomIndex];
     const doorInfo = currentRoom.connectedDoors[objectFromName];
