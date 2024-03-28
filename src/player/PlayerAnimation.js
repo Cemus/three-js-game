@@ -39,9 +39,8 @@ export default class PlayerAnimation {
       this.player.playerShootingAnim.clampWhenFinished = true;
       this.player.playerShootingAnim._mixer.addEventListener("finished", () => {
         this.player.playerShootingAnim.reset();
-        this.handleStateTransition("aiming");
         this.player.isShooting = false;
-        this.player.isAiming = false;
+        this.stateTransitionTrigger();
       });
       this.player.playerIdleAnim.play();
     }
@@ -64,9 +63,10 @@ export default class PlayerAnimation {
       this.player.moveBackward ||
       this.player.rotateLeft ||
       this.player.rotateRight ||
-      this.player.isAiming
+      this.player.isAiming ||
+      this.player.isShooting
     ) {
-      if (this.player.isAiming) {
+      if (this.player.isAiming || this.player.isShooting) {
         this.player.isShooting
           ? this.handleStateTransition("shooting")
           : this.handleStateTransition("aiming");

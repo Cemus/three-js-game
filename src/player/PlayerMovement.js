@@ -126,9 +126,7 @@ export default class PlayerMovement {
       this.player.isRunning = false;
     }
     if (!isControlDown) {
-      if (!this.player.isShooting) {
-        this.player.isAiming = this.handleAiming(false);
-      }
+      this.player.isAiming = this.handleAiming(false);
     }
     this.player.animation.stateTransitionTrigger();
   }
