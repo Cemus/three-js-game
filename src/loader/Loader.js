@@ -41,7 +41,9 @@ export default class Loader {
             async (gltf) => {
               let model = gltf.scene;
               await this.loadedModelOptimization(model);
-              addToCache("item", itemModelName, model);
+              model.children.forEach((child) => {
+                addToCache("item", child.name, child);
+              });
               resolve(model);
             },
             (xhr) => {

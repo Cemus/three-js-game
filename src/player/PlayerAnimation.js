@@ -38,7 +38,6 @@ export default class PlayerAnimation {
       this.player.playerShootingAnim.setLoop(THREE.LoopOnce);
       this.player.playerShootingAnim.clampWhenFinished = true;
       this.player.playerShootingAnim._mixer.addEventListener("finished", () => {
-        this.player.playerShootingAnim.reset();
         this.player.isShooting = false;
         this.stateTransitionTrigger();
       });
@@ -154,7 +153,7 @@ export default class PlayerAnimation {
           break;
 
         case "shooting":
-          this.player.playerShootingAnim.time = 0;
+          this.player.playerShootingAnim.reset();
           this.player.playerShootingAnim.play();
           this.player.playerShootingAnim.setEffectiveTimeScale(1);
           prevAnim.crossFadeTo(

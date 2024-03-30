@@ -2,6 +2,7 @@ import * as THREE from "three";
 import PlayerAnimation from "./PlayerAnimation";
 import PlayerCollision from "./PlayerCollision";
 import PlayerMovement from "./PlayerMovement";
+import { getFromCache } from "../loader/cache";
 
 export default class Player {
   constructor(
@@ -15,8 +16,11 @@ export default class Player {
 
     this.assetsFolder = "../../assets/models/player/";
     this.assetsModelName = "lastPsych";
-    this.mixer = null;
+
     this.model = null;
+    this.rightHand = null;
+
+    this.mixer = null;
     this.playerWalkingAnim = null;
     this.playerIdleAnim = null;
     this.playerRunningAnim = null;
@@ -115,14 +119,28 @@ export default class Player {
 
     this.spawnRotation = this.model.rotation.y;
     this.model.scale.set(0.2, 0.2, 0.2);
+    console.log("player", this.model);
+    this.rightHand = this.findRightHand();
 
     this.collider = this.updateCollider();
+    console.log(this.collider);
   }
 
   updateCollider() {
-    const box = new THREE.Box3().setFromObject(this.model);
-    box.max.y += 3; //Hauteur modifiée
+    const box = new THREE.Box3();
+    const playerPosition = this.model.position;
+
+    const playerSize = new THREE.Vector3(1, 7, 1);
+    const halfPlayerSize = playerSize.clone().multiplyScalar(0.5);
+
+    const min = playerPosition.clone().sub(halfPlayerSize);
+    const max = playerPosition.clone().add(halfPlayerSize);
+
+    box.min.copy(min);
+    box.max.copy(max);
+
     return box;
+    e;
   }
 
   update(solidInstancesList, triggerList) {
@@ -156,11 +174,41 @@ export default class Player {
       this.itemEquipped = itemEquipped;
       switch (itemEquipped.name) {
         case "nambu14":
+          const itemModel = getFromCache("item", "item_nambu14");
+          const itemCloned = itemModel.clone();
+          const handPosition = this.rightHand.position.clone();
+          const handRotation = this.rightHand.rotation.clone();
+          itemCloned.position.copy(handPosition);
+          itemCloned.rotation.copy(handRotation);
+          itemCloned.position.set(10, 110, 0);
+          itemCloned.position.y = 120;
+          itemCloned.position.z = 10;
+          itemCloned.rotation.set(1.3, 4.8, 6.2);
+          itemCloned.scale.set(75, 75, 75);
+          this.rightHand.add(itemCloned);
+          console.log(this.rightHand);
+
           break;
       }
     } else {
       this.itemEquipped = null;
+      const weaponInRightHand = this.rightHand.children[1];
+      if (weaponInRightHand) {
+        this.rightHand.remove(weaponInRightHand);
+      }
+      console.log(this.rightHand);
     }
+  }
+
+  findRightHand() {
+    let rightHandNode = null;
+    this.model.traverse((node) => {
+      if (node.userData.name === "mixamorig:RightHand") {
+        rightHandNode = node;
+        return;
+      }
+    });
+    return rightHandNode;
   }
 
   destroy() {

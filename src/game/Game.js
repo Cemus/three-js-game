@@ -25,9 +25,8 @@ export default class Game {
   }
 
   async init() {
-    document.addEventListener("keydown", this.preventBrowserShortcuts);
-
     if (this.firstInitialisation) {
+      document.addEventListener("keydown", this.preventBrowserShortcuts);
       this.rooms = await this.labyrinth.init();
       const currentRoomDoorCount =
         this.rooms[this.findRoomFromIndex()].doorCount;

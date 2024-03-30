@@ -86,12 +86,12 @@ export default class Scene {
     await this.player.init(this.loader).then(() => {
       this.addToScene(this.player.model);
     });
-    /*     this.playerColliderHelper = new THREE.Box3Helper(
+    this.playerColliderHelper = new THREE.Box3Helper(
       this.player.collider,
       0xffff00
-    ); 
+    );
     console.log(this.playerColliderHelper);
-    this.addToScene(this.playerColliderHelper);*/
+    this.addToScene(this.playerColliderHelper);
 
     //Render
     this.camera.init();
@@ -108,7 +108,7 @@ export default class Scene {
         this.player.animation.update(this.clock);
         if (!this.isTheGamePaused) {
           this.player.update(this.solidInstanceList, this.triggerList);
-          /*           this.playerColliderHelper.box.setFromObject(this.player.model); */
+          this.playerColliderHelper.box.copy(this.player.collider);
           TWEEN.update();
           this.camera.handleCameraModes();
           this.lastFrameTime =
@@ -130,7 +130,6 @@ export default class Scene {
     const tempPlayerSpawningZoneList = [];
     const tempDoorTriggerList = [];
     const tempItemBoxTriggerList = [];
-
     this.level.traverse(async (node) => {
       //Spawn
       if (node.name.startsWith("playerSpawningZone")) {
@@ -160,7 +159,7 @@ export default class Scene {
         tempDoorTriggerList.push({ node, number: triggerNumber });
       }
       //Test purpose
-      if (node.name.includes("mainDkoor")) {
+      if (node.name.includes("mainDoor")) {
         node.userData.collider = new THREE.Box3().setFromObject(node);
         tempDoorTriggerList.push({ node, number: -1 });
       }
