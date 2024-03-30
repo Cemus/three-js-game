@@ -174,7 +174,7 @@ export default class Interact {
       this.game.inventory.display();
       this.hasInteracted = true;
       this.isChoicePromptToggled = true;
-      if (inventory.slots.length < inventory.maxCapacity) {
+      if (!inventory.isInventoryFull()) {
         switch (this.inspectedItem.name) {
           case "healSmall":
             this.interactMessage.innerHTML = `Take the <span class="green-text">health drink</span> ?`;
@@ -314,7 +314,16 @@ export default class Interact {
   }
 
   addItemToInventory() {
-    this.game.inventory.slots.push(this.inspectedItem);
+    const inventorySlots = this.game.inventory.slots;
+    if (inventorySlots.length === 0) {
+      inventorySlots.push(this.inspectedItem);
+    }
+    for (let i = 0; i < inventorySlots.length; i++) {
+      if (!inventorySlots[i]) {
+        this.game.inventory.slots[i] = this.inspectedItem;
+        break;
+      }
+    }
   }
 
   async deleteItemFromRoom() {

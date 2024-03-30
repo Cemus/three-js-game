@@ -4,7 +4,7 @@ export default class Inventory {
   constructor(game) {
     this.game = game;
     this.isInventoryToggled = false;
-    this.slots = [];
+    this.slots = [null, null, null, null, null, null];
     this.maxCapacity = 6;
     this.selectedSlot = 0;
     this.prevSelectedSlot = 0;
@@ -221,13 +221,28 @@ export default class Inventory {
         break;
       }
     }
-    if (this.itemEquipped.index === item.index) {
-      this.itemEquipped = null;
+    if (this.itemEquipped) {
+      if (this.itemEquipped.index === item.index) {
+        this.itemEquipped = null;
+      }
     }
+
     this.slots.splice(this.selectedSlot, 1);
 
     this.domHandler.removeInventory(false);
     this.domHandler.createInventory(false);
     this.game.itemBox.resetInventory();
+  }
+
+  isInventoryFull() {
+    let freeSpace = 0;
+    for (let i = 0; i < this.slots.length; i++) {
+      const element = this.slots[i];
+      if (element === null) {
+        freeSpace++;
+      }
+    }
+    console.log(freeSpace);
+    return freeSpace > 0 ? false : true;
   }
 }

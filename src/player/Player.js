@@ -140,7 +140,6 @@ export default class Player {
     box.max.copy(max);
 
     return box;
-    e;
   }
 
   update(solidInstancesList, triggerList) {
