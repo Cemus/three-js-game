@@ -144,13 +144,11 @@ export default class Player {
 
   update(solidInstancesList, triggerList) {
     this.collider = this.updateCollider();
-    if (this.collision.checkWallCollisions(solidInstancesList)) {
-      this.collision.handleWallCollisions(solidInstancesList);
-    }
+
     if (this.collision.checkTriggerCollisions(triggerList)) {
       this.collision.handleTriggerCollisions(triggerList);
     }
-    this.movement.update();
+    this.movement.update(solidInstancesList);
   }
 
   resetPlayerStateDuringPause() {
@@ -179,14 +177,14 @@ export default class Player {
           const handRotation = this.rightHand.rotation.clone();
           itemCloned.position.copy(handPosition);
           itemCloned.rotation.copy(handRotation);
-          itemCloned.position.set(10, 110, 0);
+          itemCloned.position.set(10, 100, 0);
           itemCloned.position.y = 120;
           itemCloned.position.z = 10;
           itemCloned.rotation.set(1.3, 4.8, 6.2);
-          itemCloned.scale.set(75, 75, 75);
-          this.rightHand.add(itemCloned);
-          console.log(this.rightHand);
+          itemCloned.scale.set(70, 70, 70);
 
+          //Problème lors du changement de salle (logique)
+          this.rightHand.add(itemCloned);
           break;
       }
     } else {
@@ -195,7 +193,6 @@ export default class Player {
       if (weaponInRightHand) {
         this.rightHand.remove(weaponInRightHand);
       }
-      console.log(this.rightHand);
     }
   }
 

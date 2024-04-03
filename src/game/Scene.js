@@ -95,8 +95,10 @@ export default class Scene {
 
     //Render
     this.camera.init();
+    console.log(this.camera);
     this.light.init();
     this.setupRenderer();
+    console.log(this.scene);
   }
 
   animate() {
@@ -141,8 +143,15 @@ export default class Scene {
       }
       //Solid
       if (node.name.startsWith("solid_")) {
-        node.userData.collider = new THREE.Box3().setFromObject(node);
+        const parentCollider = new THREE.Box3().setFromObject(node);
+        console.log(node);
+        node.userData.collider = parentCollider;
+
+        const helper = new THREE.Box3Helper(parentCollider, 0xffff00);
+        this.addToScene(helper);
+        console.log(node);
         this.solidInstanceList.push(node);
+        console.log(this.solidInstanceList);
       }
 
       //Triggers
@@ -165,16 +174,16 @@ export default class Scene {
       }
       //Item box
       if (node.name.includes("itemBox")) {
-        node.userData.collider = new THREE.Box3().setFromObject(node);
         tempDoorTriggerList.push({ node });
       }
       //Item generation
       if (node.name.includes("itemSlot")) {
         const slotNumber = node.name.split("_")[1];
         const itemsCollider = new THREE.Box3().setFromObject(node);
-        const helper = new THREE.Box3Helper(itemsCollider, 0xffff00);
 
+        const helper = new THREE.Box3Helper(itemsCollider, 0xffff00);
         this.addToScene(helper);
+
         const currentRoomSlotItem = this.currentRoom.itemSlots[slotNumber];
         if (currentRoomSlotItem !== null) {
           const item = await this.loader.loadItem(currentRoomSlotItem.name);

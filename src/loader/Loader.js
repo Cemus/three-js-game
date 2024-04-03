@@ -1,5 +1,7 @@
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader";
 import { getFromCache, addToCache } from "./cache";
+import * as THREE from "three";
+
 export default class Loader {
   constructor() {}
 

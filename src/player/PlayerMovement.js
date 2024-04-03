@@ -7,53 +7,119 @@ export default class PlayerMovement {
     this.onKeyUp = this.onKeyUp.bind(this);
     this.isQuickTurning = false;
   }
+  update(solidInstancesList) {
+    const currentPosition = this.player.model.position.clone();
+    const speed = this.getSpeed();
+    let intendedDelta = new THREE.Vector3();
 
-  update() {
-    const rotationSpeed = 0.06;
-    const normalSpeed = 4;
-    const backwardSpeed = 2.5;
-    const runningSpeed = 4.5;
-    const multiplicateur = 0.01;
-
-    if (!this.player.isAiming && !this.player.isShooting) {
+    if (
+      (this.player.moveForward || this.player.moveBackward) &&
+      !this.player.isAiming &&
+      !this.player.isShooting
+    ) {
       if (this.player.moveForward) {
-        const forwardDelta = new THREE.Vector3(0, 0, 1).applyQuaternion(
-          this.player.model.quaternion
-        );
-        this.player.model.position.add(
-          forwardDelta.multiplyScalar(normalSpeed * multiplicateur)
-        );
+        intendedDelta = new THREE.Vector3(0, 0, 1);
+      } else {
+        intendedDelta = new THREE.Vector3(0, 0, -1);
       }
+      intendedDelta.applyQuaternion(this.player.model.quaternion);
+      const nextPosition = currentPosition
+        .clone()
+        .add(intendedDelta.multiplyScalar(speed));
 
-      if (this.player.moveBackward) {
-        const backwardDelta = new THREE.Vector3(0, 0, -1).applyQuaternion(
-          this.player.model.quaternion
+      const objectsCollidingList =
+        this.player.collision.checkSolidCollisionsAtNextPosition(
+          intendedDelta,
+          solidInstancesList
         );
-        this.player.model.position.add(
-          backwardDelta.multiplyScalar(backwardSpeed * multiplicateur)
+      if (objectsCollidingList.length > 0) {
+        this.handleTrajectoryCorrection(
+          currentPosition,
+          intendedDelta,
+          objectsCollidingList
         );
-      }
-
-      if (this.player.isRunning && this.player.moveForward) {
-        const forwardDelta = new THREE.Vector3(0, 0, 1).applyQuaternion(
-          this.player.model.quaternion
-        );
-        this.player.model.position.add(
-          forwardDelta.multiplyScalar(runningSpeed * multiplicateur)
-        );
+      } else {
+        console.log("good pos");
+        this.player.model.position.copy(nextPosition);
       }
     }
 
     if (!this.player.isShooting) {
-      let rotationDirection = 0;
-      if (this.player.rotateLeft) {
-        rotationDirection += rotationSpeed;
-      }
-      if (this.player.rotateRight) {
-        rotationDirection -= rotationSpeed;
-      }
-      this.player.model.rotateY(rotationDirection);
+      this.player.model.rotateY(this.handleRotation());
     }
+  }
+
+  handleTrajectoryCorrection(
+    currentPosition,
+    intendedDelta,
+    objectsCollidingList
+  ) {
+    let correctedDelta = intendedDelta.clone();
+    let correctedPosition;
+    for (const object of objectsCollidingList) {
+      //Changer le moyen de distinguer les murs...
+      correctedPosition = object.userData.name.includes("walls")
+        ? this.handleWallTrajectoryCorrection(
+            currentPosition,
+            correctedDelta,
+            objectsCollidingList
+          )
+        : currentPosition;
+    }
+    this.player.model.position.copy(correctedPosition);
+    this.player.model.position.y = 0;
+  }
+
+  handleWallTrajectoryCorrection(
+    currentPosition,
+    intendedPosition,
+    objectsCollidingList
+  ) {
+    const intersections = this.player.collision.getSolidCollisionNormals(
+      intendedPosition,
+      objectsCollidingList
+    );
+
+    let totalNormal = new THREE.Vector3();
+    intersections.forEach((intersection) => {
+      totalNormal.add(intersection);
+    });
+    //dp = dp - N * dot(dp,n)
+    const dotProduct = intendedPosition.dot(totalNormal);
+    const correction = totalNormal.clone().multiplyScalar(dotProduct);
+    const correctedDelta = intendedPosition.clone().sub(correction);
+    const correctedPosition = currentPosition.clone().add(correctedDelta);
+
+    return correctedPosition;
+  }
+
+  handleRotation() {
+    const rotationSpeed = 0.06;
+    let rotationDirection = 0;
+    if (this.player.rotateLeft) {
+      rotationDirection += rotationSpeed;
+    }
+    if (this.player.rotateRight) {
+      rotationDirection -= rotationSpeed;
+    }
+    return rotationDirection;
+  }
+
+  getSpeed() {
+    const normalSpeed = 4;
+    const backwardSpeed = 2.5;
+    const runningSpeed = 7;
+    const multiplicateur = 0.01;
+
+    let speed = normalSpeed * multiplicateur;
+
+    if (this.player.moveForward && this.player.isRunning) {
+      speed = runningSpeed * multiplicateur;
+    }
+    if (this.player.moveBackward) {
+      speed = backwardSpeed * multiplicateur;
+    }
+    return speed;
   }
 
   onKeyDown(e) {

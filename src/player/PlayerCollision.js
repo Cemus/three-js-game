@@ -5,7 +5,7 @@ export default class PlayerCollision {
     this.player = player;
   }
 
-  checkWallCollisions(solidInstancesList) {
+  checkSolidCollisions(solidInstancesList) {
     for (const object of solidInstancesList) {
       if (object.userData.isSolid) {
         if (this.player.collider.intersectsBox(object.userData.collider)) {
@@ -16,52 +16,79 @@ export default class PlayerCollision {
     return false;
   }
 
-  handleWallCollisions(solidInstancesList) {
-    const pushDistance = 0.1;
-    const originalY = this.player.model.position.y;
-    const directionsToTest = [
-      new THREE.Vector3(-pushDistance, 0, 0), // Gauche
-      new THREE.Vector3(pushDistance, 0, 0), // Droite
-      new THREE.Vector3(0, 0, -pushDistance), // Arrière
-      new THREE.Vector3(0, 0, pushDistance), // Avant
-      new THREE.Vector3(-pushDistance, 0, -pushDistance), // Diagonale haut gauche
-      new THREE.Vector3(pushDistance, 0, -pushDistance), // Diagonale haut droite
-      new THREE.Vector3(-pushDistance, 0, pushDistance), // Diagonale bas gauche
-      new THREE.Vector3(pushDistance, 0, pushDistance), // Diagonale bas droite
-    ];
+  checkSolidCollisionsAtNextPosition(position, solidInstancesList) {
+    const playerCollider = this.player.collider.clone();
+    playerCollider.translate(position); // Déplacer le collider du joueur à la prochaine position
 
-    let newPosition = this.player.model.position.clone();
-    const collisionBox = new THREE.Box3().setFromObject(this.player.model);
-
-    for (const direction of directionsToTest) {
-      const offset = direction.clone();
-
-      newPosition.add(offset);
-      collisionBox.translate(offset);
-
-      let isColliding = false;
-
-      // Collision ?
-      for (const object of solidInstancesList) {
-        if (
-          object.userData.isSolid &&
-          collisionBox.intersectsBox(object.userData.collider)
-        ) {
-          isColliding = true;
-          break;
+    const objectsCollidingList = [];
+    for (const object of solidInstancesList) {
+      if (object.userData.isSolid) {
+        const objectCollider = object.userData.collider;
+        if (playerCollider.intersectsBox(objectCollider)) {
+          objectsCollidingList.push(object);
         }
       }
-
-      if (!isColliding) {
-        this.player.model.position.copy(newPosition);
-        this.player.model.position.y = originalY;
-        return;
-      }
-
-      // Reset
-      newPosition.sub(offset);
-      collisionBox.translate(offset.negate());
     }
+    return objectsCollidingList;
+  }
+
+  checkSolidCollisionsAtNextPosition(position, solidInstancesList) {
+    const playerBox = new THREE.Box3().copy(this.player.collider);
+    const nextPlayerPosition = this.player.model.position.clone().add(position);
+    playerBox.translate(nextPlayerPosition.sub(this.player.model.position));
+    const objectsCollidingList = [];
+    for (const object of solidInstancesList) {
+      if (object.userData.isSolid) {
+        if (playerBox.intersectsBox(object.userData.collider)) {
+          objectsCollidingList.push(object);
+        }
+      }
+    }
+    return objectsCollidingList;
+  }
+
+  getSolidCollisionNormals(position, objectsCollidingList) {
+    const playerBox = new THREE.Box3().copy(this.player.collider);
+    const nextPlayerPosition = this.player.model.position.clone().add(position);
+    playerBox.translate(nextPlayerPosition.sub(this.player.model.position));
+
+    const intersections = [];
+    console.log(objectsCollidingList);
+    for (const object of objectsCollidingList) {
+      console.log(object);
+      const objectCollider = object.userData.collider;
+      if (playerBox.intersectsBox(objectCollider)) {
+        if (object.isMesh) {
+          const objectNormal = this.getNormal(object);
+          intersections.push(objectNormal);
+        }
+      }
+    }
+    return intersections;
+  }
+
+  getNormal(object) {
+    console.log("object", object);
+    const normalAttribute = object.geometry.attributes.normal;
+    const objectNormal = new THREE.Vector3();
+    for (let i = 0; i < normalAttribute.count; i++) {
+      const normal = new THREE.Vector3(
+        normalAttribute.getX(i),
+        normalAttribute.getY(i),
+        normalAttribute.getZ(i)
+      );
+      objectNormal.addScaledVector(normal, 1); // Ajouter la normale avec un facteur de 1
+    }
+
+    objectNormal.divideScalar(normalAttribute.count).normalize();
+
+    const normalMatrix = new THREE.Matrix3().getNormalMatrix(
+      object.matrixWorld
+    );
+
+    objectNormal.applyMatrix3(normalMatrix).normalize();
+    console.log(objectNormal);
+    return objectNormal;
   }
 
   checkTriggerCollisions(triggerList) {
@@ -107,6 +134,7 @@ export default class PlayerCollision {
         }
       }
       for (const object of itemBoxTrigers) {
+        //Ajouter un trigger spécifique, pas la boîte en elle-même
         if (this.player.collider.intersectsBox(object.userData.collider)) {
           this.player.toggleInteractPrompt("itemBox");
         }
