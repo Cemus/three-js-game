@@ -31,7 +31,7 @@ export default class Scene {
     this.loader = new Loader();
     this.camera = new Camera(this);
     this.light = new Light(this);
-    this.stats = new Stats();
+    /*    this.stats = new Stats(); */
     this.clock = new THREE.Clock();
 
     this.shadowHelper = null;
@@ -61,8 +61,8 @@ export default class Scene {
     window.addEventListener("resize", this.handleWindowResizeBinded);
 
     //Panel framerate
-    this.stats.showPanel(0);
-    document.body.appendChild(this.stats.dom);
+    /*     this.stats.showPanel(0);
+  document.body.appendChild(this.stats.dom);*/
 
     //Scene
     this.scene = new THREE.Scene();
@@ -91,8 +91,8 @@ export default class Scene {
       0xffff00
     );
     console.log(this.playerColliderHelper);
-    this.addToScene(this.playerColliderHelper);
-
+    /*     this.addToScene(this.playerColliderHelper);
+     */
     //Render
     this.camera.init();
     console.log(this.camera);
@@ -103,15 +103,15 @@ export default class Scene {
 
   animate() {
     if (!this.changingScene) {
-      this.stats.begin();
-      const currentTime = performance.now();
+      /*       this.stats.begin();
+       */ const currentTime = performance.now();
       const elapsedFrameTime = currentTime - this.lastFrameTime;
       if (elapsedFrameTime > this.frameDelay) {
         this.player.animation.update(this.clock);
         if (!this.isTheGamePaused) {
           this.player.update(this.solidInstanceList, this.triggerList);
-          this.playerColliderHelper.box.copy(this.player.collider);
-          TWEEN.update();
+          /*           this.playerColliderHelper.box.copy(this.player.collider);
+           */ TWEEN.update();
           this.camera.handleCameraModes();
           this.lastFrameTime =
             currentTime - (elapsedFrameTime % this.frameDelay);
@@ -119,7 +119,8 @@ export default class Scene {
         this.composer.render(this.scene, this.camera.currentCamera.camera);
       }
       requestAnimationFrame(this.animate.bind(this));
-      this.stats.end();
+      /*       this.stats.end();
+       */
     }
   }
 
@@ -147,8 +148,10 @@ export default class Scene {
         console.log(node);
         node.userData.collider = parentCollider;
 
+        /*         
+        Collider helper
         const helper = new THREE.Box3Helper(parentCollider, 0xffff00);
-        this.addToScene(helper);
+        this.addToScene(helper); */
         console.log(node);
         this.solidInstanceList.push(node);
         console.log(this.solidInstanceList);
@@ -181,9 +184,10 @@ export default class Scene {
         const slotNumber = node.name.split("_")[1];
         const itemsCollider = new THREE.Box3().setFromObject(node);
 
+        /*
         const helper = new THREE.Box3Helper(itemsCollider, 0xffff00);
         this.addToScene(helper);
-
+        */
         const currentRoomSlotItem = this.currentRoom.itemSlots[slotNumber];
         if (currentRoomSlotItem !== null) {
           const item = await this.loader.loadItem(currentRoomSlotItem.name);
@@ -256,8 +260,8 @@ export default class Scene {
     this.changingScene = true;
     //Dom
     window.removeEventListener("resize", this.handleWindowResizeBinded);
-    document.body.removeChild(this.stats.dom);
-    //Remove objects
+    /*     document.body.removeChild(this.stats.dom);
+     */ //Remove objects
     this.player.destroy();
     this.light = null;
     this.camera = null;
