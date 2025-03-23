@@ -33,7 +33,7 @@ export default class Loader {
 
   async loadItem(itemModelName) {
     const modelAlreadyExists = getFromCache("item", itemModelName);
-    const url = `../assets/models/items/${itemModelName}.gltf`;
+    const url = `../../assets/models/items/${itemModelName}.gltf`;
     return modelAlreadyExists
       ? modelAlreadyExists
       : new Promise((resolve, reject) => {
@@ -61,7 +61,7 @@ export default class Loader {
 
   async loadRoom(roomModelName) {
     const modelAlreadyExists = getFromCache("room", roomModelName);
-    const url = `../assets/models/rooms/${roomModelName}.gltf`;
+    const url = `../../assets/models/rooms/${roomModelName}.gltf`;
     return modelAlreadyExists
       ? modelAlreadyExists
       : new Promise((resolve, reject) => {
@@ -87,7 +87,7 @@ export default class Loader {
 
   async loadAnimation(parent, animationName) {
     const animationAlreadyExists = getFromCache("animation", animationName);
-    const url = `../assets/animations/${parent}/${animationName}.gltf`;
+    const url = `../../assets/animations/${parent}/${animationName}.gltf`;
     return animationAlreadyExists
       ? animationAlreadyExists
       : new Promise((resolve, reject) => {

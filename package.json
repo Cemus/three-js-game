@@ -5,7 +5,11 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "vite"
+    "preview": "vite preview",
+    "dev": "vite",
+    "build": "vite build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +20,7 @@
     "three": "^0.160.0"
   },
   "devDependencies": {
-    "vite": "^6.2.2"
+    "vite": "^6.2.2",
+    "gh-pages": "^6.1.0"
   }
 }

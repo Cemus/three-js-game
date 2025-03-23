@@ -14,7 +14,7 @@ export default class Player {
     this.cameraTriggerActivation = cameraTriggerActivation;
     this.toggleInteractPrompt = toggleInteractPrompt;
 
-    this.assetsFolder = "../assets/models/player/";
+    this.assetsFolder = "../../assets/models/player/";
     this.assetsModelName = "lastPsych";
 
     this.model = null;
