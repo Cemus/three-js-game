@@ -3,9 +3,11 @@ import Inventory from "./Inventory";
 import Interact from "./Interact";
 import LabyrinthGenerator from "./LabyrinthGenerator";
 import ItemBox from "./ItemBox";
+import LoadingScreen from "./LoadingScreen";
 
 export default class Game {
   constructor() {
+    this.loading = new LoadingScreen();
     this.scene = null;
     this.inventory = null;
     this.playerSpawningZone = null;
@@ -25,26 +27,36 @@ export default class Game {
   }
 
   async init() {
+    this.loading.setMessage("Loading level...");
     if (this.firstInitialisation) {
       document.addEventListener("keydown", this.preventBrowserShortcuts);
       this.rooms = await this.labyrinth.init();
+
       const currentRoomDoorCount =
         this.rooms[this.findRoomFromIndex()].doorCount;
       this.playerSpawningZone = Math.floor(
         Math.random() * currentRoomDoorCount
       );
     }
+
     this.scene = new Scene(
       this.rooms[this.findRoomFromIndex()],
       this.playerSpawningZone,
       this.setPlayerSpawningZone.bind(this),
       this.interact.displayInteractPrompt.bind(this.interact)
     );
+    this.loading.setMessage("Loading assets...");
+
     await this.scene.init().then(() => {
+      this.loading.setMessage("Loading successfull");
+      this.loading.displayLoadingScreen(false);
+
       this.startGame();
     });
   }
   startGame() {
+    this.loading.setMessage("Assets loaded...");
+
     this.interact.hasInteracted = false;
     this.scene.animate();
     if (this.firstInitialisation) {

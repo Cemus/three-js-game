@@ -3,11 +3,15 @@ import { getFromCache, addToCache } from "./cache";
 import * as THREE from "three";
 
 export default class Loader {
+  base = import.meta.env.BASE_URL || "/";
   constructor() {}
 
-  async loadCharacter(folder, characterName) {
+  async loadCharacter(isPlayer, characterName) {
     const modelAlreadyExists = getFromCache("character", characterName);
-    const url = `${folder}${characterName}.gltf`;
+    const url = isPlayer
+      ? `${this.base}assets/models/player/${characterName}.gltf`
+      : `${this.base}assets/models/enemies/}${characterName}.gltf`;
+
     return modelAlreadyExists
       ? modelAlreadyExists
       : new Promise((resolve, reject) => {
@@ -33,7 +37,7 @@ export default class Loader {
 
   async loadItem(itemModelName) {
     const modelAlreadyExists = getFromCache("item", itemModelName);
-    const url = `../../assets/models/items/${itemModelName}.gltf`;
+    const url = `${this.base}assets/models/items/${itemModelName}.gltf`;
     return modelAlreadyExists
       ? modelAlreadyExists
       : new Promise((resolve, reject) => {
@@ -61,7 +65,7 @@ export default class Loader {
 
   async loadRoom(roomModelName) {
     const modelAlreadyExists = getFromCache("room", roomModelName);
-    const url = `../../assets/models/rooms/${roomModelName}.gltf`;
+    const url = `${this.base}assets/models/rooms/${roomModelName}.gltf`;
     return modelAlreadyExists
       ? modelAlreadyExists
       : new Promise((resolve, reject) => {
@@ -87,7 +91,7 @@ export default class Loader {
 
   async loadAnimation(parent, animationName) {
     const animationAlreadyExists = getFromCache("animation", animationName);
-    const url = `../../assets/animations/${parent}/${animationName}.gltf`;
+    const url = `${this.base}assets/animations/${parent}/${animationName}.gltf`;
     return animationAlreadyExists
       ? animationAlreadyExists
       : new Promise((resolve, reject) => {

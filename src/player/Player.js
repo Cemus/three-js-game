@@ -14,7 +14,6 @@ export default class Player {
     this.cameraTriggerActivation = cameraTriggerActivation;
     this.toggleInteractPrompt = toggleInteractPrompt;
 
-    this.assetsFolder = "../../assets/models/player/";
     this.assetsModelName = "lastPsych";
 
     this.model = null;
@@ -55,10 +54,7 @@ export default class Player {
 
   async setupAssets(loader) {
     try {
-      this.model = await loader.loadCharacter(
-        this.assetsFolder,
-        this.assetsModelName
-      );
+      this.model = await loader.loadCharacter(true, this.assetsModelName);
 
       this.mixer = new THREE.AnimationMixer(this.model);
 
