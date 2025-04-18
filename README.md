@@ -18,8 +18,7 @@
 
 <h3 align='center'>Démo technique avec ThreeJs</h3>
 
-<p align="center">
-Démonstration technique réalisée en essayant de reproduire un style de jeu façon Resident Evil ou Silent Hill avec "tank controls" dans l'optique de me familiariser avec ThreeJs.
+<p align="center">Démonstration technique réalisée en essayant de reproduire un style de jeu façon Resident Evil ou Silent Hill avec "tank controls" dans l'optique de me familiariser avec ThreeJs.</p>
 <br />
 <a href='https://cemus.github.io/three-js-game/'><strong>Voir le site »</strong></a>
 <br />
@@ -57,10 +56,10 @@ Démonstration technique réalisée en essayant de reproduire un style de jeu fa
 
 ## Features
 
-- Personnage en 3D pouvant se déplacer façon "tank"
+- Personnage en 3D pouvant se marcher façon "tank" avec les touches ZQSD, courrir avec SHIFT + ZQSD
 - Changement de caméra dynamique en fonction des déplacements du joueur
-- Possibilité de ramasser des objets et de les conserver dans une boîte dédiée
-- Récupération d'une arme possible et modification de l'animation du personnage joueur
+- Possibilité de ramasser des objets et de les conserver dans une boîte dédiée (touche espace)
+- Récupération d'une arme possible et modification de l'animation du personnage joueur (touche CTRL pour viser une fois l'arme équipée)
 
 <p align='right'>(<a href='#readme-top'>Retour en haut</a>)</p>
 
